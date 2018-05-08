@@ -4,6 +4,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -18,8 +19,8 @@ public class BookingReferences {
 
 	@Id
 	@Column(name = "Booking_Reference_Id")
-	@GeneratedValue
-	private int id;
+	@GeneratedValue(strategy= GenerationType.AUTO)
+	private Integer id;
 
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "booking_id")
@@ -34,7 +35,7 @@ public class BookingReferences {
 	}
 
 	@Column(name = "Reference_Type")
-	private int ref_type;
+	private Integer ref_type;
 
 	@Column(name = "Reference")
 	private String reference;
@@ -43,19 +44,19 @@ public class BookingReferences {
 		super();
 	}
 
-	public int getId1() {
+	public Integer getId1() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
-	public int getRef_type() {
+	public Integer getRef_type() {
 		return ref_type;
 	}
 
-	public void setRef_type(int ref_type) {
+	public void setRef_type(Integer ref_type) {
 		this.ref_type = ref_type;
 	}
 

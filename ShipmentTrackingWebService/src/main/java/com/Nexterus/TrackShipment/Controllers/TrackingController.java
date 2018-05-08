@@ -1,12 +1,8 @@
 package com.Nexterus.TrackShipment.Controllers;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -24,7 +20,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.Nexterus.TrackShipment.Models.Banyan.AuthenticationData;
-import com.Nexterus.TrackShipment.Models.Banyan.BanyanStatus;
 import com.Nexterus.TrackShipment.Models.Banyan.TrackingStatusRequest;
 import com.Nexterus.TrackShipment.Models.Banyan.TrackingStatusResponse;
 import com.Nexterus.TrackShipment.Models.UPS.TrackRequest;
@@ -32,9 +27,10 @@ import com.Nexterus.TrackShipment.Models.UPS.UPS_TrackRequest;
 import com.Nexterus.TrackShipment.Models.XPO.OAuth2Token;
 import com.Nexterus.TrackShipment.Models.XPO.XPOAccess;
 import com.Nexterus.TrackShipment.Repos.BookingRepository;
+import com.Nexterus.TrackShipment.Services.GetCurrentStatus;
 import com.Nexterus.TrackShipment.Services.GetRefNum;
-import com.Nexterus.TrackShipment.Services.SampleBanyanTrackResponse;
 import com.Nexterus.TrackShipment.Services.TrackingResponseHandler;
+import com.google.gson.Gson;
 
 @RestController
 @RequestMapping("/")
@@ -53,7 +49,7 @@ public class TrackingController {
 	@Autowired
 	GetRefNum refNumService;
 	@Autowired
-	SampleBanyanTrackResponse sampleService;
+	GetCurrentStatus currentStatusService;
 
 	@GetMapping("/getBanyanStatuses")
 	public TrackingStatusResponse getBanyanStatuses() {
@@ -75,9 +71,6 @@ public class TrackingController {
 			ResponseEntity<TrackingStatusResponse> response = restTemplate.exchange(url, HttpMethod.POST, entity,
 					TrackingStatusResponse.class);
 			trackResponseService.handleTrackingResponse(response.getBody(), 0, 0);
-			/*
-			 * sampleService.handleTrackingResponse(getSampleBanyanTrackresponse(), 0, 0);
-			 */
 			return response.getBody();
 		} catch (HttpClientErrorException e) {
 			System.out.println(e.getStatusCode());
@@ -112,18 +105,23 @@ public class TrackingController {
 		return response.getBody();
 	}
 
-	@GetMapping("/getXPOStatus/{id}")
-	public Object getXPOStatus(@PathVariable int id) {
+	@GetMapping("/getXPOStatus/{ref}/{type}")
+	public Object getXPOStatus(@PathVariable String ref, @PathVariable int type) {
 
 		if (authToken.getAccessToken() == null) {
 			authToken = getXPOBearerToken();
 		}
-
+		int id = 0;
+		String refNum = null;
+		if (type == 0) {
+			id = Integer.parseInt(ref);
+			refNum = refNumService.getRefNum(id);
+			if (refNum.length() > 20)
+				return refNum;
+		} else
+			refNum = ref;
 		String accessToken = "Bearer " + authToken.getAccessToken();
 
-		String refNum = refNumService.getRefNum(id);
-		if (refNum.length() > 20)
-			return refNum;
 		RestTemplate restTemplate = new RestTemplate();
 		String url1 = "https://api.ltl.xpo.com/tracking/1.0/shipments/shipment-status-details?referenceNumbers="
 				+ refNum;
@@ -134,7 +132,8 @@ public class TrackingController {
 		HttpEntity<HttpHeaders> entity = new HttpEntity<>(headers);
 		try {
 			ResponseEntity<Object> response = restTemplate.exchange(url1, HttpMethod.GET, entity, Object.class);
-			trackResponseService.handleTrackingResponse(response.getBody(), id, 1);
+			if (id != 0)
+				trackResponseService.handleTrackingResponse(response.getBody(), id, 1);
 			return response.getBody();
 		} catch (HttpClientErrorException e) {
 			System.out.println(e.getStatusCode());
@@ -144,12 +143,18 @@ public class TrackingController {
 		}
 	}
 
-	@PostMapping("/getUPSStatus/{id}")
-	public Object getUPSstatus(@PathVariable int id) {
+	@PostMapping("/getUPSStatus/{ref}/{type}")
+	public Object getUPSstatus(@PathVariable String ref, @PathVariable int type) {
 
-		String refNum = refNumService.getRefNum(id);
-		if (refNum.length() > 20)
-			return refNum;
+		int id = 0;
+		String refNum = null;
+		if (type == 0) {
+			id = Integer.parseInt(ref);
+			refNum = refNumService.getRefNum(id);
+			if (refNum.length() > 20)
+				return refNum;
+		} else
+			refNum = ref;
 
 		trackRequest.setInquiryNumber(refNum);
 		UPSTrackRequest.setTrackRequest(trackRequest);
@@ -163,12 +168,22 @@ public class TrackingController {
 		HttpEntity<UPS_TrackRequest> entity = new HttpEntity<>(UPSTrackRequest, headers);
 		try {
 			ResponseEntity<Object> response = restTemplate.exchange(url, HttpMethod.POST, entity, Object.class);
-			trackResponseService.handleTrackingResponse(response.getBody(), id, 2);
+			if (id != 0)
+				trackResponseService.handleTrackingResponse(response.getBody(), id, 2);
 			return response.getBody();
 		} catch (HttpClientErrorException e) {
 			System.out.println(e.getStatusCode());
 			System.out.println(e.getResponseBodyAsString());
 			return e.getResponseBodyAsString();
 		}
+	}
+
+	@GetMapping("/getCurrentStatus/{bookingID}")
+	public Object getCurrentStatus(@PathVariable int bookingID) {
+		JSONObject json = new JSONObject();
+		json = currentStatusService.getBookingCurrentStatus(bookingID);
+		Gson gson = new Gson();
+		Object obj = gson.fromJson(json.toString(), Object.class);
+		return obj;
 	}
 }

@@ -22,7 +22,7 @@ public class XpoTrackResponseHandler {
 			status = jArr.getJSONObject(0).getJSONObject("shipmentStatus").getString("statusCd");
 			message = jArr.getJSONObject(0).getJSONObject("shipmentStatus").getString("description");
 			location = jArr.getJSONObject(0).getJSONObject("currSic").getString("sicName");
-			Long time = jArr.getJSONObject(0).getJSONObject("shipmentStatus").getLong("dateTime");
+			Long time = json.getLong("transactionTimestamp");
 			timestamp = new java.sql.Timestamp(time);
 			System.out.println(timestamp);
 		} catch (JSONException e) {

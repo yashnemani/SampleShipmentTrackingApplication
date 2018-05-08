@@ -20,10 +20,10 @@ public class SampleBanyanTrackResponse {
 		trackResponseSample.setSuccess(true);
 		List<BanyanStatus> banyanStatuses = new ArrayList<>();
 		BanyanStatus banStatus = new BanyanStatus();
-		banStatus.setLoadID(13609404);
-		banStatus.setBOL("0001636518");
-		banStatus.setProNumber("102722260705");
-		String dt = "2018-04-24T13:53:00.000+0000";
+		banStatus.setLoadID(13607130);
+		banStatus.setBOL("21758022");
+		banStatus.setProNumber("1057218806");
+		String dt = "2018-05-07T17:06:13.050+0000";
 		String date = dt.substring(0, 10);
 		String time = dt.substring(11, 19);
 		DateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -35,13 +35,17 @@ public class SampleBanyanTrackResponse {
 		}
 		banStatus.setDateTime(dateTime);
 		banStatus.setCode("D1");
-		banStatus.setCarrierMessage("Delivered");
+		banStatus.setCarrierMessage("Manually moved to Delivered on May  7 2018  5:06PM by Automation");
 		banStatus.setBanyanMessage("Completed Unloading at Delivery Location");
 		banStatus.setCity("DENVER");
 		banStatus.setState("CO");
 		banyanStatuses.add(banStatus);
 		BanyanStatus banStatus1 = new BanyanStatus();
-		banStatus1 = banStatus;
+		banStatus1.setLoadID(13609404);
+		banStatus1.setBOL("0001636518");
+		banStatus1.setProNumber("102722260705");
+		banStatus1.setCity("DENVER");
+		banStatus1.setState("CO");
 		banStatus1.setCarrierMessage("Dispatched for Delivery");
 		banStatus1.setBanyanMessage("En Route to Delivery Location");
 		banStatus1.setCode("X6");

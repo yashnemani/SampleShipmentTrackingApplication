@@ -25,6 +25,7 @@ import com.Nexterus.TrackShipment.Entities.BookingStatus;
 import com.Nexterus.TrackShipment.Entities.NxtStatusDates;
 import com.Nexterus.TrackShipment.Repos.BookingRepository;
 import com.Nexterus.TrackShipment.Repos.BookingStatusRepository;
+import com.google.gson.Gson;
 
 @Service
 public class BanyanTrackResponseHandler {
@@ -33,6 +34,8 @@ public class BanyanTrackResponseHandler {
 	BookingStatusRepository bookStatusRepo;
 	@Autowired
 	BookingRepository bookRepo;
+	@Autowired
+	SampleBanyanTrackResponse sampleService;
 
 	public void handleTrackResponse(JSONObject json) {
 
@@ -41,14 +44,21 @@ public class BanyanTrackResponseHandler {
 				System.out.println("No trackng statuses returned by Banyan");
 				return;
 			}
-
-			JSONArray statuses = json.getJSONArray("TrackingStatuses");
-			if (statuses == null) {
+			JSONArray statuses = null;
+			if (!json.has("TrackingStatuses")) {
 				System.out.println("No trackng statuses returned by Banyan");
+				// Test Response
+				/*
+				 * Gson gson = new Gson(); String jstring =
+				 * gson.toJson(sampleService.getSampleBanyanTrackresponse()); json = new
+				 * JSONObject(jstring);
+				 */
 				return;
 			}
-			for (int i = 0; i < statuses.length(); i++) {
+			statuses = json.getJSONArray("TrackingStatuses");
+			for (int i = statuses.length() - 1; i >= 0; i--) {
 				JSONObject statusResponse = statuses.getJSONObject(i);
+				System.out.println(i + " " + statusResponse.getString("Code"));
 				handleLoadStatus(statusResponse);
 			}
 		} catch (JSONException e) {
@@ -63,16 +73,22 @@ public class BanyanTrackResponseHandler {
 			Integer loadId = statusResponse.getInt("LoadID");
 			String bolNum = statusResponse.getString("BOL");
 			String proNum = statusResponse.getString("ProNumber");
-			String city = statusResponse.getString("City");
-			String state = statusResponse.getString("State");
-			String location = city + "," + state;
+			String city = null;
+			String state = null;
+			String location = null;
+			if (statusResponse.has("City"))
+				city = statusResponse.getString("City");
+			if (statusResponse.has("State"))
+				state = statusResponse.getString("State");
+			if (city != null && state != null)
+				location = city + "," + state;
 			String message = statusResponse.getString("CarrierMessage");
 			String status = statusResponse.getString("Code");
-			//Temporary
-			String dt = "2018-04-24T13:53:00.000+0000";
+			/* String dt = statusResponse.getString("DateTime"); */
+			String dt = "2018-05-07T17:06:13.050+0000";
 			String date = dt.substring(0, 10);
 			String time = dt.substring(11, 19);
-			System.out.println("Date: "+date+" Time: "+time);
+			System.out.println("Date: " + date + " Time: " + time);
 			DateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			java.sql.Timestamp dateTime = null;
 			try {
@@ -83,7 +99,7 @@ public class BanyanTrackResponseHandler {
 
 			List<BigDecimal> bookingIds = new ArrayList<>();
 			bookingIds = bookStatusRepo.findBookingByReference(3, loadId.toString());
-			if(bookingIds.isEmpty())
+			if (bookingIds.isEmpty())
 				return;
 			System.out.println(bookingIds.get(0));
 			Integer bookingID = bookingIds.get(0).intValue();
@@ -122,14 +138,15 @@ public class BanyanTrackResponseHandler {
 				statusDates = booking.getStatusDates();
 			else
 				statusDates.setBooking(booking);
-			if (status.equals("D1"))
-				statusDates.setDt_delivered(dateTime);
-			else if (status.equals("AF"))
-				statusDates.setDt_pickedup(dateTime);
-
 			booking.setStatusDates(statusDates);
 			String EdiStatus = status;
 			String NxtStatus = bookStatusRepo.findNxtStatus(EdiStatus);
+			if (NxtStatus.equals("DL"))
+				statusDates.setDt_delivered(dateTime);
+			else if (NxtStatus.equals("IT")) {
+				if (statusDates.getDt_pickedup() == null)
+					statusDates.setDt_pickedup(dateTime);
+			}
 			Set<BookingStatus> bookStatuses = new HashSet<>();
 			BookingStatus bookingStatus = new BookingStatus();
 			bookingStatus.setLocation(location);

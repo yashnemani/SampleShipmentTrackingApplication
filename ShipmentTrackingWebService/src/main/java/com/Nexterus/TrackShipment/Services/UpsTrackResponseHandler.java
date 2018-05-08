@@ -32,23 +32,40 @@ public class UpsTrackResponseHandler {
 			message = jsob.getJSONObject("CurrentStatus").getString("Description");
 
 			JSONArray jArr = new JSONArray();
-			jArr = jsob.getJSONArray("DeliveryDetail");
-			String dt = jArr.getJSONObject(0).getString("Date");
-			String time = jArr.getJSONObject(0).getString("Time");
-			String year = dt.substring(0, 4);
-			String month = dt.substring(4, 6);
-			String day = dt.substring(6, 8);
-			String hour = time.substring(0, 2);
-			String minutes = time.substring(2, 4);
-			String sec = time.substring(4, 6);
-			DateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
+			JSONObject jsObj;
+			String dt = null;
+			String time = null;
 			try {
-				timestamp = new java.sql.Timestamp(dateTimeFormatter
-						.parse(year + "-" + month + "-" + day + " " + hour + ":" + minutes + ":" + sec).getTime());
-				System.out.println(timestamp);
-			} catch (ParseException e) {
-				e.printStackTrace();
+				jArr = jsob.getJSONArray("DeliveryDetail");
+				dt = jArr.getJSONObject(0).getString("Date");
+				time = jArr.getJSONObject(0).getString("Time");
+			} catch (JSONException e) {
+				System.out.println(e.getCause() + " " + e.getMessage());
+			}
+			if (dt == null)
+				try {
+					jsObj = jsob.getJSONObject("DeliveryDetail");
+					dt = jsObj.getString("Date");
+					time = jsObj.getString("Time");
+				} catch (JSONException e) {
+					System.out.println(e.getCause() + " " + e.getMessage());
+				}
+			if (dt != null) {
+				String year = dt.substring(0, 4);
+				String month = dt.substring(4, 6);
+				String day = dt.substring(6, 8);
+				String hour = time.substring(0, 2);
+				String minutes = time.substring(2, 4);
+				String sec = time.substring(4, 6);
+				DateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+				try {
+					timestamp = new java.sql.Timestamp(dateTimeFormatter
+							.parse(year + "-" + month + "-" + day + " " + hour + ":" + minutes + ":" + sec).getTime());
+					System.out.println(timestamp);
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
 			}
 		} catch (JSONException e) {
 			System.out.println(e.getCause() + " " + e.getMessage());
@@ -61,8 +78,8 @@ public class UpsTrackResponseHandler {
 		bookingStatus.setDate(timestamp);
 		return bookingStatus;
 	}
-	
-	public java.sql.Timestamp getPickupDate(JSONObject json){
+
+	public java.sql.Timestamp getPickupDate(JSONObject json) {
 		java.sql.Timestamp pkupDate = null;
 		try {
 			JSONObject jsob;
@@ -73,8 +90,8 @@ public class UpsTrackResponseHandler {
 			String day = dt.substring(6, 8);
 			DateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			try {
-				pkupDate = new java.sql.Timestamp(dateTimeFormatter
-						.parse(year + "-" + month + "-" + day + " "+"00:00:00").getTime());
+				pkupDate = new java.sql.Timestamp(
+						dateTimeFormatter.parse(year + "-" + month + "-" + day + " " + "00:00:00").getTime());
 				System.out.println(pkupDate);
 			} catch (ParseException e) {
 				e.printStackTrace();
