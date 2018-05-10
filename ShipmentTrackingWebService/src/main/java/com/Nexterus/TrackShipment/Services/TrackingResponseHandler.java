@@ -129,8 +129,11 @@ public class TrackingResponseHandler {
 		currentStatus.setDate(bookingStatus.getDate());
 		booking.setCurrentStatus(currentStatus);
 
+		// Delete Booking from TrackingQueue if status is delivered
+		if (EdiStatus.equals("D1"))
+			bookRepo.deleteFromTrackingQueue(id);
+
 		bookRepo.save(booking);
 		bookRepo.refresh(booking);
-
 	}
 }

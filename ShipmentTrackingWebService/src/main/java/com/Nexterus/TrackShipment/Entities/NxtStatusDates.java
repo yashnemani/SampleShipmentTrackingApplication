@@ -4,6 +4,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
@@ -15,20 +16,20 @@ public class NxtStatusDates {
 
 	@Id
 	@Column(name = "id")
-	@GeneratedValue
+	@GeneratedValue(strategy= GenerationType.IDENTITY)
 	private int id;
 
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "bookingId")
 	private Booking booking;
 
-	@Column(name = "dt_entered")
-	private java.sql.Timestamp dt_entered;
+	@Column(name = "dt_booked")
+	private java.sql.Timestamp dt_booked;
 
-	@Column(name = "dt_pkup")
+	@Column(name = "DT_PICKED_UP")
 	private java.sql.Timestamp dt_pickedup;
 
-	@Column(name = "dt_dlvr")
+	@Column(name = "DT_DELIEVERED")
 	private java.sql.Timestamp dt_delivered;
 
 	public NxtStatusDates() {
@@ -52,11 +53,11 @@ public class NxtStatusDates {
 	}
 
 	public java.sql.Timestamp getDt_entered() {
-		return dt_entered;
+		return dt_booked;
 	}
 
-	public void setDt_entered(java.sql.Timestamp dt_entered) {
-		this.dt_entered = dt_entered;
+	public void setDt_entered(java.sql.Timestamp dt_booked) {
+		this.dt_booked = dt_booked;
 	}
 
 	public java.sql.Timestamp getDt_pickedup() {

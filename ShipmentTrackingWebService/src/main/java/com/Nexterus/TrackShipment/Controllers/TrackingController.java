@@ -27,6 +27,7 @@ import com.Nexterus.TrackShipment.Models.UPS.UPS_TrackRequest;
 import com.Nexterus.TrackShipment.Models.XPO.OAuth2Token;
 import com.Nexterus.TrackShipment.Models.XPO.XPOAccess;
 import com.Nexterus.TrackShipment.Repos.BookingRepository;
+import com.Nexterus.TrackShipment.Services.BanyanTrackResponseHandler;
 import com.Nexterus.TrackShipment.Services.GetCurrentStatus;
 import com.Nexterus.TrackShipment.Services.GetRefNum;
 import com.Nexterus.TrackShipment.Services.TrackingResponseHandler;
@@ -50,7 +51,10 @@ public class TrackingController {
 	GetRefNum refNumService;
 	@Autowired
 	GetCurrentStatus currentStatusService;
+	@Autowired
+	BanyanTrackResponseHandler trackResponseHandler;
 
+	// Get a list of all updated Banyan shipment statuses
 	@GetMapping("/getBanyanStatuses")
 	public TrackingStatusResponse getBanyanStatuses() {
 
@@ -79,6 +83,7 @@ public class TrackingController {
 		}
 	}
 
+	// Get the Security Access Token for XPO
 	@PostMapping("/getXPOBearerToken")
 	public OAuth2Token getXPOBearerToken() {
 
@@ -105,6 +110,7 @@ public class TrackingController {
 		return response.getBody();
 	}
 
+	// Get the XPO shipment status for a given reference
 	@GetMapping("/getXPOStatus/{ref}/{type}")
 	public Object getXPOStatus(@PathVariable String ref, @PathVariable int type) {
 
@@ -143,6 +149,7 @@ public class TrackingController {
 		}
 	}
 
+	// Get the UPS shipment status for a given reference
 	@PostMapping("/getUPSStatus/{ref}/{type}")
 	public Object getUPSstatus(@PathVariable String ref, @PathVariable int type) {
 
@@ -178,10 +185,17 @@ public class TrackingController {
 		}
 	}
 
+	// Get the Current Status details for a given Booking ID
 	@GetMapping("/getCurrentStatus/{bookingID}")
 	public Object getCurrentStatus(@PathVariable int bookingID) {
+		
+		//Test Track Response BLOB
+		/*Object obj = trackResponseHandler.getBanyanResponse(7);*/
+		
 		JSONObject json = new JSONObject();
 		json = currentStatusService.getBookingCurrentStatus(bookingID);
+		if (json == null)
+			return "Booking does not exist in DB or does not have a current status for ID " + bookingID;
 		Gson gson = new Gson();
 		Object obj = gson.fromJson(json.toString(), Object.class);
 		return obj;

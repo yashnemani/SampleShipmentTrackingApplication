@@ -14,10 +14,12 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
+@EnableScheduling
 public class JPAconfiguration {
 	@Autowired
 	public DataSource dataSource;
@@ -25,12 +27,20 @@ public class JPAconfiguration {
 	@Bean
 	public DataSource dataSource() {
 
-		final DriverManagerDataSource dataSource = new DriverManagerDataSource();
-		dataSource.setDriverClassName("oracle.jdbc.OracleDriver");
-		dataSource.setUrl("jdbc:oracle:thin:@nfr-win-orat01:1521:xdev");
-		dataSource.setUsername("tbb");
-		dataSource.setPassword("test02");
-		return dataSource;
+		// DEV DB
+		final DriverManagerDataSource devDataSource = new DriverManagerDataSource();
+		devDataSource.setDriverClassName("oracle.jdbc.OracleDriver");
+		devDataSource.setUrl("jdbc:oracle:thin:@nfr-win-orat01:1521:xdev");
+		devDataSource.setUsername("tbb");
+		devDataSource.setPassword("test02");
+		// Production DB
+		final DriverManagerDataSource prodDataSource = new DriverManagerDataSource();
+		prodDataSource.setDriverClassName("oracle.jdbc.OracleDriver");
+		prodDataSource.setUrl("jdbc:oracle:thin:@nfr-win-orap02:1521:titan");
+		prodDataSource.setUsername("tbb");
+		prodDataSource.setPassword("2lgbbt2");
+
+		return devDataSource;
 	}
 
 	@Bean

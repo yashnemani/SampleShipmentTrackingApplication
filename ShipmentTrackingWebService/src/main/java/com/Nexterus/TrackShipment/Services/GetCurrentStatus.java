@@ -15,22 +15,24 @@ public class GetCurrentStatus {
 	BookingRepository bookRepo;
 
 	public JSONObject getBookingCurrentStatus(int bookingID) {
+
 		Booking book = null;
-		try {
+		if (bookRepo.existsById(bookingID))
 			book = bookRepo.findById(bookingID).get();
-		} catch (Exception e) {
-			System.err.println(e.getCause().getMessage());
+		else
 			return null;
-		}
 
 		JSONObject json = new JSONObject();
 		if (book.getCurrentStatus() != null) {
 			try {
+				// Current Status Details
 				json.put("Shipment Status", book.getCurrentStatus().getShipStatus());
 				json.put("Shipment State", book.getCurrentStatus().getShipState());
 				json.put("Nexterus Message", book.getCurrentStatus().getMessage());
 				json.put("Current Location", book.getCurrentStatus().getLocation());
 				json.put("Date Updated", book.getCurrentStatus().getDate().toString());
+
+				// Booking References
 				if (!book.getReferences().isEmpty()) {
 					JSONObject references = new JSONObject();
 					if (book.getReferences().stream().filter(a -> a.getRef_type() == 0).findFirst().isPresent())
@@ -45,6 +47,8 @@ public class GetCurrentStatus {
 				else {
 					System.out.println("Booking with ID: " + bookingID + " does not have any References");
 				}
+
+				// Nexterus Status Dates
 				if (book.getStatusDates() != null) {
 					JSONObject StatusDates = new JSONObject();
 					if (book.getStatusDates().getDt_entered() != null)
@@ -58,10 +62,10 @@ public class GetCurrentStatus {
 				} else {
 					System.out.println("Booking with ID: " + bookingID + " does not have Nexterus Status Dates");
 				}
+				return json;
 			} catch (JSONException e) {
 				System.err.println(e);
 			}
-			return json;
 		}
 		return null;
 	}

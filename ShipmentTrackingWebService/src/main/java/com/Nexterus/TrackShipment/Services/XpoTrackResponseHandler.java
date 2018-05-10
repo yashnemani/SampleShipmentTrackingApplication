@@ -21,12 +21,23 @@ public class XpoTrackResponseHandler {
 			jArr = json.getJSONObject("data").getJSONArray("shipmentStatusDtls");
 			status = jArr.getJSONObject(0).getJSONObject("shipmentStatus").getString("statusCd");
 			message = jArr.getJSONObject(0).getJSONObject("shipmentStatus").getString("description");
+			try {
 			location = jArr.getJSONObject(0).getJSONObject("currSic").getString("sicName");
+			}
+			 catch (JSONException e) {
+					System.err.println(e.getCause() + " " + e.getMessage());
+					try {
+						location = jArr.getJSONObject(0).getJSONObject("origSic").getString("sicName");
+						}
+					catch(JSONException e1) {
+						System.err.println(e1.getCause() + " " + e1.getMessage());
+					}
+				}
 			Long time = json.getLong("transactionTimestamp");
 			timestamp = new java.sql.Timestamp(time);
 			System.out.println(timestamp);
 		} catch (JSONException e) {
-			System.out.println(e.getCause() + " " + e.getMessage());
+			System.err.println(e.getCause() + " " + e.getMessage());
 			return null;
 		}
 		BookingStatus bookingStatus = new BookingStatus();
