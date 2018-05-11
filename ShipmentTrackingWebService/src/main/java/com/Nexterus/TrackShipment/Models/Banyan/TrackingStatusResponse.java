@@ -1,5 +1,6 @@
 package com.Nexterus.TrackShipment.Models.Banyan;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +9,9 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Component
-public class TrackingStatusResponse {
+public class TrackingStatusResponse implements Serializable{
+	
+	private static final long serialVersionUID = 1L;
 	@Autowired
 	private List<BanyanStatus> TrackingStatuses;
 	private boolean Success;

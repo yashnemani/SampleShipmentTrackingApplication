@@ -64,8 +64,10 @@ public class BanyanStatusHandlerService {
 
 			List<BigDecimal> bookingIds = new ArrayList<>();
 			bookingIds = bookStatusRepo.findBookingByReference(3, loadId.toString());
-			if (bookingIds.isEmpty())
+			if (bookingIds.isEmpty()) {
+				System.out.println("No Booking found with the following Load ID as Reference");
 				return;
+				}
 			System.out.println(bookingIds.get(0));
 			Integer bookingID = bookingIds.get(0).intValue();
 			Booking booking = bookRepo.getOne(bookingID);

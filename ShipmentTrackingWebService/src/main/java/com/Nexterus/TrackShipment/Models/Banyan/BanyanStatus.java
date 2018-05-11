@@ -1,12 +1,15 @@
 package com.Nexterus.TrackShipment.Models.Banyan;
 
+import java.io.Serializable;
+
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Component
-public class BanyanStatus {
+public class BanyanStatus implements Serializable{
 
+	private static final long serialVersionUID = 1L;
 	public Integer LoadID;
 	public String BOL;
 	public String ProNumber;

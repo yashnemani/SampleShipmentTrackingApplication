@@ -40,7 +40,7 @@ public class JPAconfiguration {
 		prodDataSource.setUsername("tbb");
 		prodDataSource.setPassword("2lgbbt2");
 
-		return devDataSource;
+		return prodDataSource;
 	}
 
 	@Bean

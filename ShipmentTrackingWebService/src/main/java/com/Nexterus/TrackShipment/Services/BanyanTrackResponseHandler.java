@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.Nexterus.TrackShipment.Entities.BanyanTrackingResponse;
+import com.Nexterus.TrackShipment.Models.Banyan.TrackingStatusResponse;
 import com.Nexterus.TrackShipment.Repos.BanyanTrackingResponseRepository;
 import com.Nexterus.TrackShipment.Repos.BookingRepository;
 import com.Nexterus.TrackShipment.Repos.BookingStatusRepository;
@@ -47,14 +48,16 @@ public class BanyanTrackResponseHandler {
 			if (!json.has("TrackingStatuses")) {
 				System.out.println("No trackng statuses returned by Banyan");
 				// Test Response
-			/*	String jstring = gson.toJson(sampleService.getSampleBanyanTrackresponse());*/
-			/*	json = new JSONObject(jstring);*/
-				return;
+				String jstring = gson.toJson(getBanyanResponse(300));
+				json = new JSONObject(jstring);
+				statuses = json.getJSONArray("TrackingStatuses");
+				/* return; */
+			} else {
+				statuses = json.getJSONArray("TrackingStatuses");
+				Object obj = gson.fromJson(statuses.toString(), Object.class);
+				saveBanyanTrackResponse(obj);
 			}
-			statuses = json.getJSONArray("TrackingStatuses");
-			Object obj = gson.fromJson(statuses.toString(), Object.class);
-			saveBanyanTrackResponse(obj);
-
+			
 			for (int i = statuses.length() - 1; i >= 0; i--) {
 				JSONObject statusResponse = statuses.getJSONObject(i);
 				System.out.println(i + " " + statusResponse.getString("Code"));
@@ -67,24 +70,23 @@ public class BanyanTrackResponseHandler {
 		return;
 	}
 
-	public Object getBanyanResponse(int id) {
+	public TrackingStatusResponse getBanyanResponse(int id) {
 
+		TrackingStatusResponse trackResponseSample = new TrackingStatusResponse();
 		if (!saveResponseRepo.existsById(id)) {
 			System.out.println("No saved response with given ID");
 			return null;
 		}
 		BanyanTrackingResponse banyanTrackResponse = new BanyanTrackingResponse();
 		banyanTrackResponse = saveResponseRepo.findById(id).get();
-		Object obj = null;
 		try {
 			ByteArrayInputStream in = new ByteArrayInputStream(banyanTrackResponse.getTrackResponse());
 			ObjectInputStream his = new ObjectInputStream(in);
-			obj = his.readObject();
-			return obj;
+			trackResponseSample = (TrackingStatusResponse) his.readObject();
 		} catch (ClassNotFoundException | IOException e) {
 			System.err.println("Deserialize Track Response " + e.getCause().getMessage());
 		}
-		return obj;
+		return trackResponseSample;
 	}
 
 	public void saveBanyanTrackResponse(Object obj) {

@@ -30,6 +30,7 @@ import com.Nexterus.TrackShipment.Repos.BookingRepository;
 import com.Nexterus.TrackShipment.Services.BanyanTrackResponseHandler;
 import com.Nexterus.TrackShipment.Services.GetCurrentStatus;
 import com.Nexterus.TrackShipment.Services.GetRefNum;
+import com.Nexterus.TrackShipment.Services.SampleBanyanTrackResponse;
 import com.Nexterus.TrackShipment.Services.TrackingResponseHandler;
 import com.google.gson.Gson;
 
@@ -53,6 +54,8 @@ public class TrackingController {
 	GetCurrentStatus currentStatusService;
 	@Autowired
 	BanyanTrackResponseHandler trackResponseHandler;
+	@Autowired
+	SampleBanyanTrackResponse sampleService;
 
 	// Get a list of all updated Banyan shipment statuses
 	@GetMapping("/getBanyanStatuses")
@@ -81,6 +84,7 @@ public class TrackingController {
 			System.out.println(e.getResponseBodyAsString());
 			return null;
 		}
+
 	}
 
 	// Get the Security Access Token for XPO
@@ -188,10 +192,7 @@ public class TrackingController {
 	// Get the Current Status details for a given Booking ID
 	@GetMapping("/getCurrentStatus/{bookingID}")
 	public Object getCurrentStatus(@PathVariable int bookingID) {
-		
-		//Test Track Response BLOB
-		/*Object obj = trackResponseHandler.getBanyanResponse(7);*/
-		
+
 		JSONObject json = new JSONObject();
 		json = currentStatusService.getBookingCurrentStatus(bookingID);
 		if (json == null)
