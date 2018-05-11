@@ -19,17 +19,17 @@ public class TrackSchedulerService {
 	@Autowired
 	BookingRepository bookRepo;
 
-	@Scheduled(cron = "0 0/10 * * * ?") 
+	@Scheduled(cron = "0 0/10 * * * ?")
 	public void banyanTrackingScheduler() {
 		trackController.getBanyanStatuses();
 	}
 
-	@Scheduled(cron = "0 0/5 * * * ?") 
+	@Scheduled(cron = "0 0/5 * * * ?")
 	public void XPO_TrackingScheduler() {
 
 		List<BigDecimal> trackIds = new ArrayList<>();
 		trackIds = bookRepo.getTrackIdsFromQueue(1);
-		trackIds.forEach(a -> trackController.getUPSstatus(a.toString(), 0));
+		trackIds.forEach(a -> trackController.getXPOStatus(a.toString(), 0));
 	}
 
 	@Scheduled(cron = "0 0/5 * * * ?")
