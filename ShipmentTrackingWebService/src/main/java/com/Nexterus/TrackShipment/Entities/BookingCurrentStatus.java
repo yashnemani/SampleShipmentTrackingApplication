@@ -25,7 +25,7 @@ public class BookingCurrentStatus {
 	private Booking booking;
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinColumn(name = "statusID")
+	@JoinColumn(name = "BOOK_STATUS_ID")
 	private BookingStatus status;
 
 	@Column(name = "Shipment_Status")
