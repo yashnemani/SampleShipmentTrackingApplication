@@ -58,6 +58,13 @@ public class TrackingResponseHandler {
 		}
 		if (bookingStatus == null)
 			return;
+
+		if (!bookRepo.existsById(id)) {
+			System.out.println("Booking does not exist for ID. " + id + " could be Reference Number");
+			return;
+		} 
+		Booking booking = bookRepo.getOne(id);
+		
 		status = bookingStatus.getStatus();
 		System.out.println("Carrier Status Code: " + status);
 		String EdiStatus = bookStatusRepo.findEdiStatus(provider, status);
@@ -73,13 +80,7 @@ public class TrackingResponseHandler {
 			return;
 		}
 		System.out.println("Nexterus Status Code: " + NxtStatus);
-		if (!bookRepo.existsById(id)) {
-			System.out.println("Booking does not exist for ID. " + id + " could be Reference Number");
-			return;
-		}
 
-		Booking booking = bookRepo.getOne(id);
-		System.out.println("Avoiding Lazy Init " + booking.getStatusDates() + " " + booking.getStatuses().size());
 		NxtStatusDates statusDates = new NxtStatusDates();
 		if (booking.getStatusDates() != null)
 			statusDates = booking.getStatusDates();

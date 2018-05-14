@@ -145,6 +145,10 @@ public class BanyanStatusHandlerService {
 			currentStatus.setDate(dateTime);
 			booking.setCurrentStatus(currentStatus);
 
+			// Delete Booking from TrackingQueue if status is delivered
+			if (EdiStatus.equals("D1"))
+				bookRepo.deleteFromTrackingQueue(bookingID);
+			
 			bookRepo.save(booking);
 			bookRepo.refresh(booking);
 		} catch (JSONException e) {
