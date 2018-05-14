@@ -2,6 +2,8 @@ package com.Nexterus.TrackShipment.Controllers;
 
 import java.util.Arrays;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -27,6 +29,7 @@ import com.Nexterus.TrackShipment.Models.UPS.UPS_TrackRequest;
 import com.Nexterus.TrackShipment.Models.XPO.OAuth2Token;
 import com.Nexterus.TrackShipment.Models.XPO.XPOAccess;
 import com.Nexterus.TrackShipment.Repos.BookingRepository;
+import com.Nexterus.TrackShipment.Services.BanyanStatusHandlerService;
 import com.Nexterus.TrackShipment.Services.BanyanTrackResponseHandler;
 import com.Nexterus.TrackShipment.Services.GetCurrentStatus;
 import com.Nexterus.TrackShipment.Services.GetRefNum;
@@ -56,6 +59,8 @@ public class TrackingController {
 	BanyanTrackResponseHandler trackResponseHandler;
 	@Autowired
 	SampleBanyanTrackResponse sampleService;
+	@Autowired
+	BanyanStatusHandlerService statusHandlerService;
 
 	// Get a list of all updated Banyan shipment statuses
 	@GetMapping("/getBanyanStatuses")
@@ -200,5 +205,32 @@ public class TrackingController {
 		Gson gson = new Gson();
 		Object obj = gson.fromJson(json.toString(), Object.class);
 		return obj;
+	}
+
+	@GetMapping("/getSavedTrackResponse")
+	public Object getTrackResponseBlob() {
+		Object obj = trackResponseHandler.getBanyanResponse(500);
+		return obj;
+	}
+
+	@GetMapping("/testSampleBanyanResponse")
+	public void testSampleBanyanResponse() {
+
+		JSONArray statuses = null;
+		Gson gson = new Gson();
+		String jstring = gson.toJson(sampleService.getSampleBanyanTrackresponse());
+		JSONObject json;
+		try {
+			json = new JSONObject(jstring);
+			statuses = json.getJSONArray("TrackingStatuses");
+			for (int i = statuses.length() - 1; i >= 0; i--) {
+				JSONObject statusResponse = statuses.getJSONObject(i);
+				System.out.println(i + " " + statusResponse.getString("Code"));
+				statusHandlerService.handleLoadStatus(statusResponse);
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
 	}
 }

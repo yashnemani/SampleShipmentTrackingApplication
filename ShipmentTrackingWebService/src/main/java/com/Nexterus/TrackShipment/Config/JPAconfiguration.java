@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@EnableScheduling
+/*@EnableScheduling*/
 public class JPAconfiguration {
 	@Autowired
 	public DataSource dataSource;

@@ -49,7 +49,7 @@ public class BanyanStatusHandlerService {
 				location = city + "," + state;
 			String message = statusResponse.getString("CarrierMessage");
 			String status = statusResponse.getString("Code");
-			/*String dt = statusResponse.getString("DateTime");*/
+			/* String dt = statusResponse.getString("DateTime"); */
 			String dt = "2018-05-10T17:06:13.050+0000";
 			String date = dt.substring(0, 10);
 			String time = dt.substring(11, 19);
@@ -67,7 +67,7 @@ public class BanyanStatusHandlerService {
 			if (bookingIds.isEmpty()) {
 				System.out.println("No Booking found with the following Load ID as Reference");
 				return;
-				}
+			}
 			System.out.println(bookingIds.get(0));
 			Integer bookingID = bookingIds.get(0).intValue();
 			Booking booking = bookRepo.getOne(bookingID);
@@ -100,7 +100,7 @@ public class BanyanStatusHandlerService {
 				references.add(bookref);
 			}
 			booking.setReferences(references);
-			
+
 			NxtStatusDates statusDates = new NxtStatusDates();
 			if (booking.getStatusDates() != null)
 				statusDates = booking.getStatusDates();
@@ -110,8 +110,9 @@ public class BanyanStatusHandlerService {
 			String EdiStatus = status;
 			String NxtStatus = bookStatusRepo.findNxtStatus(EdiStatus);
 			if (NxtStatus == null) {
-System.err.println("EDI Status "+EdiStatus+" does not exist in DB or does not have a valid mapping!");
-return;
+				System.err
+						.println("EDI Status " + EdiStatus + " does not exist in DB or does not have a valid mapping!");
+				return;
 			}
 			if (NxtStatus.equals("DL"))
 				statusDates.setDt_delivered(dateTime);
@@ -119,7 +120,7 @@ return;
 				if (statusDates.getDt_pickedup() == null)
 					statusDates.setDt_pickedup(dateTime);
 			}
-			
+
 			Set<BookingStatus> bookStatuses = new HashSet<>();
 			BookingStatus bookingStatus = new BookingStatus();
 			bookingStatus.setLocation(location);

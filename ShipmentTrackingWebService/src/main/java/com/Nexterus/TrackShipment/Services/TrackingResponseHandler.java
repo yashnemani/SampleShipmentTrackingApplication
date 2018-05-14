@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.Nexterus.TrackShipment.Entities.Booking;
 import com.Nexterus.TrackShipment.Entities.BookingCurrentStatus;
@@ -30,6 +31,7 @@ public class TrackingResponseHandler {
 	@Autowired
 	BanyanTrackResponseHandler banyanHandler;
 
+	@Transactional
 	public void handleTrackingResponse(Object obj, int id, int provider) {
 
 		Gson gson = new Gson();
@@ -77,6 +79,7 @@ public class TrackingResponseHandler {
 		}
 
 		Booking booking = bookRepo.getOne(id);
+		System.out.println("Avoiding Lazy Init " + booking.getStatusDates() + " " + booking.getStatuses().size());
 		NxtStatusDates statusDates = new NxtStatusDates();
 		if (booking.getStatusDates() != null)
 			statusDates = booking.getStatusDates();

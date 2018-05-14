@@ -47,17 +47,13 @@ public class BanyanTrackResponseHandler {
 
 			if (!json.has("TrackingStatuses")) {
 				System.out.println("No trackng statuses returned by Banyan");
-				// Test Response
-				String jstring = gson.toJson(getBanyanResponse(300));
-				json = new JSONObject(jstring);
-				statuses = json.getJSONArray("TrackingStatuses");
-				/* return; */
+				return;
 			} else {
 				statuses = json.getJSONArray("TrackingStatuses");
-				Object obj = gson.fromJson(statuses.toString(), Object.class);
+				Object obj = gson.fromJson(json.toString(), Object.class);
 				saveBanyanTrackResponse(obj);
 			}
-			
+
 			for (int i = statuses.length() - 1; i >= 0; i--) {
 				JSONObject statusResponse = statuses.getJSONObject(i);
 				System.out.println(i + " " + statusResponse.getString("Code"));
@@ -70,9 +66,10 @@ public class BanyanTrackResponseHandler {
 		return;
 	}
 
-	public TrackingStatusResponse getBanyanResponse(int id) {
+	public Object getBanyanResponse(int id) {
 
 		TrackingStatusResponse trackResponseSample = new TrackingStatusResponse();
+		Object obj = null;
 		if (!saveResponseRepo.existsById(id)) {
 			System.out.println("No saved response with given ID");
 			return null;
@@ -82,11 +79,12 @@ public class BanyanTrackResponseHandler {
 		try {
 			ByteArrayInputStream in = new ByteArrayInputStream(banyanTrackResponse.getTrackResponse());
 			ObjectInputStream his = new ObjectInputStream(in);
-			trackResponseSample = (TrackingStatusResponse) his.readObject();
+			obj = his.readObject();
+			/* trackResponseSample = (TrackingStatusResponse) his.readObject(); */
 		} catch (ClassNotFoundException | IOException e) {
 			System.err.println("Deserialize Track Response " + e.getCause().getMessage());
 		}
-		return trackResponseSample;
+		return obj;
 	}
 
 	public void saveBanyanTrackResponse(Object obj) {

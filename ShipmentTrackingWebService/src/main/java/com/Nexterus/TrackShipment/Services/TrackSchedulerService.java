@@ -19,7 +19,7 @@ public class TrackSchedulerService {
 	@Autowired
 	BookingRepository bookRepo;
 
-	@Scheduled(cron = "0 0/10 * * * ?")
+	@Scheduled(cron = "0 1 * * * ?")
 	public void banyanTrackingScheduler() {
 		trackController.getBanyanStatuses();
 	}
