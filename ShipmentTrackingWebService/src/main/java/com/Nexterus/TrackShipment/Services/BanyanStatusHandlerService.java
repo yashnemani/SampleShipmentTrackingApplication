@@ -33,7 +33,7 @@ public class BanyanStatusHandlerService {
 	@Autowired
 	BookingRepository bookRepo;
 
-	public void handleLoadStatus(JSONObject statusResponse) {
+	public void handleLoadStatus(JSONObject statusResponse, String dt) {
 		try {
 			Integer loadId = statusResponse.getInt("LoadID");
 			String bolNum = statusResponse.getString("BOL");
@@ -49,8 +49,6 @@ public class BanyanStatusHandlerService {
 				location = city + "," + state;
 			String message = statusResponse.getString("CarrierMessage");
 			String status = statusResponse.getString("Code");
-			String dt = statusResponse.getString("DateTime");
-			/* String dt = "2018-05-15T17:06:13.050+0000"; */
 			String date = dt.substring(0, 10);
 			String time = dt.substring(11, 19);
 			System.out.println("Date: " + date + " Time: " + time);
@@ -59,7 +57,16 @@ public class BanyanStatusHandlerService {
 			try {
 				dateTime = new java.sql.Timestamp(dateTimeFormatter.parse(date + " " + time).getTime());
 			} catch (ParseException e) {
-				e.printStackTrace();
+				System.err.println(e.getCause() + " " + e.getMessage());
+				dt = "2018-05-15T17:06:13.050+0000";
+				date = dt.substring(0, 10);
+				time = dt.substring(11, 19);
+				System.out.println("Date: " + date + " Time: " + time);
+				try {
+					dateTime = new java.sql.Timestamp(dateTimeFormatter.parse(date + " " + time).getTime());
+				} catch (ParseException e1) {
+					System.err.println(e1.getCause() + " " + e1.getMessage());
+				}
 			}
 
 			List<BigDecimal> bookingIds = new ArrayList<>();

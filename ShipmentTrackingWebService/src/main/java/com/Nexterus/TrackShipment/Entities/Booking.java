@@ -53,7 +53,7 @@ public class Booking implements Persistable<Integer> {
 	@OneToOne(fetch = FetchType.EAGER, mappedBy = "booking", cascade = CascadeType.MERGE)
 	private BookingCurrentStatus currentStatus;
 
-	@OneToOne(fetch = FetchType.LAZY, mappedBy = "booking", cascade = CascadeType.ALL)
+	@OneToOne(fetch = FetchType.LAZY, mappedBy = "booking", cascade = CascadeType.MERGE)
 	private NxtStatusDates statusDates;
 
 	@Transient

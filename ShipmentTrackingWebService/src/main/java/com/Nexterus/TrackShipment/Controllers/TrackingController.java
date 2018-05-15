@@ -56,7 +56,7 @@ public class TrackingController {
 	@Autowired
 	GetCurrentStatus currentStatusService;
 	@Autowired
-	BanyanTrackResponseHandler trackResponseHandler;
+	BanyanTrackResponseHandler banyanTrackResponseHandler;
 	@Autowired
 	SampleBanyanTrackResponse sampleService;
 	@Autowired
@@ -82,7 +82,7 @@ public class TrackingController {
 		try {
 			ResponseEntity<TrackingStatusResponse> response = restTemplate.exchange(url, HttpMethod.POST, entity,
 					TrackingStatusResponse.class);
-			trackResponseHandler.handleTrackResponse(response.getBody());
+			banyanTrackResponseHandler.handleTrackResponse(response.getBody());
 			return response.getBody();
 		} catch (HttpClientErrorException e) {
 			System.out.println(e.getStatusCode());
@@ -207,30 +207,20 @@ public class TrackingController {
 		return obj;
 	}
 
-	@GetMapping("/getSavedTrackResponse")
-	public Object getTrackResponseBlob() {
-		Object obj = trackResponseHandler.getBanyanResponse(600);
-		return obj;
+	@GetMapping("/getSavedTrackResponse/{id}")
+	public TrackingStatusResponse getTrackResponseBlob(@PathVariable int id) {
+
+		TrackingStatusResponse trackResponse = new TrackingStatusResponse();
+		trackResponse = banyanTrackResponseHandler.getBanyanResponse(id);
+		return trackResponse;
 	}
 
-	@GetMapping("/testSampleBanyanResponse")
-	public void testSampleBanyanResponse() {
+	@GetMapping("/testSampleBanyanResponse/{id}")
+	public void testSampleBanyanResponse(@PathVariable int id) {
 
-		JSONArray statuses = null;
-		Gson gson = new Gson();
-		String jstring = gson.toJson(sampleService.getSampleBanyanTrackresponse());
-		JSONObject json;
-		try {
-			json = new JSONObject(jstring);
-			statuses = json.getJSONArray("TrackingStatuses");
-			for (int i = statuses.length() - 1; i >= 0; i--) {
-				JSONObject statusResponse = statuses.getJSONObject(i);
-				System.out.println(i + " " + statusResponse.getString("Code"));
-				statusHandlerService.handleLoadStatus(statusResponse);
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-
+		if (id != 0)
+			banyanTrackResponseHandler.handleTrackResponse(banyanTrackResponseHandler.getBanyanResponse(id));
+		else
+			banyanTrackResponseHandler.handleTrackResponse(sampleService.getSampleBanyanTrackresponse());
 	}
 }

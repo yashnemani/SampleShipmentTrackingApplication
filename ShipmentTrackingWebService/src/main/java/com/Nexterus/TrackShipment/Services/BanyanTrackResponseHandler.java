@@ -7,6 +7,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,6 +42,13 @@ public class BanyanTrackResponseHandler {
 		Gson gson = new Gson();
 		String js = gson.toJson(trackResponse);
 		JSONObject json = new JSONObject();
+		
+		List<String> dates = new ArrayList<>();	
+		for(int i=0; i<trackResponse.getTrackingStatuses().size();i++) {
+		String date = trackResponse.getTrackingStatuses().get(i).getDateTime().toString();
+		dates.add(date);
+		}
+	
 		try {
 			json = new JSONObject(js);
 		}
@@ -65,7 +74,7 @@ public class BanyanTrackResponseHandler {
 			for (int i = statuses.length() - 1; i >= 0; i--) {
 				JSONObject statusResponse = statuses.getJSONObject(i);
 				System.out.println(i + " " + statusResponse.getString("Code"));
-				statusHandlerService.handleLoadStatus(statusResponse);
+				statusHandlerService.handleLoadStatus(statusResponse, dates.get(i));
 			}
 		} catch (JSONException e) {
 			System.out.println(e.getCause() + " " + e.getMessage());

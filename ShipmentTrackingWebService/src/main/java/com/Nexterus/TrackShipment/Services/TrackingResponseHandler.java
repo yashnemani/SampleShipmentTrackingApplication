@@ -94,6 +94,7 @@ public class TrackingResponseHandler {
 			}
 			if (EdiStatus.equals("D1") && statusDates.getDt_delivered() == null) {
 				dlvrDate = bookingStatus.getDate();
+				System.out.println("Dlvr Date: "+dlvrDate);
 				statusDates.setDt_delivered(dlvrDate);
 			}
 		} else {
@@ -105,6 +106,7 @@ public class TrackingResponseHandler {
 			statusDates.setDt_pickedup(pkupDate);
 			if (EdiStatus.equals("D1")) {
 				dlvrDate = bookingStatus.getDate();
+				System.out.println("Dlvr Date: "+dlvrDate);
 				statusDates.setDt_delivered(dlvrDate);
 			}
 		}

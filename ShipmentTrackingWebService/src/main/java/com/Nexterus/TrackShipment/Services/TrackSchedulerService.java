@@ -19,8 +19,8 @@ public class TrackSchedulerService {
 	@Autowired
 	BookingRepository bookRepo;
 
-	Integer XPO_Batch = 0;
-	Integer UPS_Batch = 0;
+	Integer XPO_Batch = 2;
+	Integer UPS_Batch = 1;
 
 	@Scheduled(cron = "0 1 * * * ?")
 	public void banyanTrackingScheduler() {
