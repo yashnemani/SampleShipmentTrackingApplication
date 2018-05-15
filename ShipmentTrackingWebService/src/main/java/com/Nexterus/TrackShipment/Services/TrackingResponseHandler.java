@@ -46,10 +46,7 @@ public class TrackingResponseHandler {
 			System.out.println(e.getCause() + " " + e.getMessage());
 			return;
 		}
-		if (provider == 0) {
-			banyanHandler.handleTrackResponse(jobj);
-			return;
-		}
+
 		if (provider == 1) {
 			bookingStatus = xpoHandler.handleXpoTrackResponse(jobj);
 		}
@@ -62,9 +59,9 @@ public class TrackingResponseHandler {
 		if (!bookRepo.existsById(id)) {
 			System.out.println("Booking does not exist for ID. " + id + " could be Reference Number");
 			return;
-		} 
+		}
 		Booking booking = bookRepo.getOne(id);
-		
+
 		status = bookingStatus.getStatus();
 		System.out.println("Carrier Status Code: " + status);
 		String EdiStatus = bookStatusRepo.findEdiStatus(provider, status);

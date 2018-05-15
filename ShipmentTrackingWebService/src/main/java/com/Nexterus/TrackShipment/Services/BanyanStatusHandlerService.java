@@ -49,8 +49,8 @@ public class BanyanStatusHandlerService {
 				location = city + "," + state;
 			String message = statusResponse.getString("CarrierMessage");
 			String status = statusResponse.getString("Code");
-			/* String dt = statusResponse.getString("DateTime"); */
-			String dt = "2018-05-10T17:06:13.050+0000";
+			String dt = statusResponse.getString("DateTime");
+			/* String dt = "2018-05-15T17:06:13.050+0000"; */
 			String date = dt.substring(0, 10);
 			String time = dt.substring(11, 19);
 			System.out.println("Date: " + date + " Time: " + time);
@@ -101,12 +101,6 @@ public class BanyanStatusHandlerService {
 			}
 			booking.setReferences(references);
 
-			NxtStatusDates statusDates = new NxtStatusDates();
-			if (booking.getStatusDates() != null)
-				statusDates = booking.getStatusDates();
-			else
-				statusDates.setBooking(booking);
-			booking.setStatusDates(statusDates);
 			String EdiStatus = status;
 			String NxtStatus = bookStatusRepo.findNxtStatus(EdiStatus);
 			if (NxtStatus == null) {
@@ -114,12 +108,19 @@ public class BanyanStatusHandlerService {
 						.println("EDI Status " + EdiStatus + " does not exist in DB or does not have a valid mapping!");
 				return;
 			}
+
+			NxtStatusDates statusDates = new NxtStatusDates();
+			if (booking.getStatusDates() != null)
+				statusDates = booking.getStatusDates();
+			else
+				statusDates.setBooking(booking);
 			if (NxtStatus.equals("DL"))
 				statusDates.setDt_delivered(dateTime);
 			else if (NxtStatus.equals("IT")) {
 				if (statusDates.getDt_pickedup() == null)
 					statusDates.setDt_pickedup(dateTime);
 			}
+			booking.setStatusDates(statusDates);
 
 			Set<BookingStatus> bookStatuses = new HashSet<>();
 			BookingStatus bookingStatus = new BookingStatus();
@@ -148,7 +149,7 @@ public class BanyanStatusHandlerService {
 			// Delete Booking from TrackingQueue if status is delivered
 			if (EdiStatus.equals("D1"))
 				bookRepo.deleteFromTrackingQueue(bookingID);
-			
+
 			bookRepo.save(booking);
 			bookRepo.refresh(booking);
 		} catch (JSONException e) {

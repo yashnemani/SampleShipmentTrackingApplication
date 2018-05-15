@@ -11,6 +11,6 @@ import com.Nexterus.TrackShipment.Entities.Booking;
 
 public interface BookingRepository extends JpaRepository<Booking, Integer>, BookingRepositoryCustom {
 	
-	@Query(nativeQuery=true, value="select booking_id from tracking_queue where provider_id=:provider")
+	@Query(nativeQuery=true, value="select booking_id from tracking_queue where provider_id=:provider order by booking_id")
 	List<BigDecimal> getTrackIdsFromQueue(@Param("provider")int providerId);
 }

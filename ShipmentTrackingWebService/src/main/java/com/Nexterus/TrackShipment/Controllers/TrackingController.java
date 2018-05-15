@@ -82,7 +82,7 @@ public class TrackingController {
 		try {
 			ResponseEntity<TrackingStatusResponse> response = restTemplate.exchange(url, HttpMethod.POST, entity,
 					TrackingStatusResponse.class);
-			trackResponseService.handleTrackingResponse(response.getBody(), 0, 0);
+			trackResponseHandler.handleTrackResponse(response.getBody());
 			return response.getBody();
 		} catch (HttpClientErrorException e) {
 			System.out.println(e.getStatusCode());
@@ -209,7 +209,7 @@ public class TrackingController {
 
 	@GetMapping("/getSavedTrackResponse")
 	public Object getTrackResponseBlob() {
-		Object obj = trackResponseHandler.getBanyanResponse(500);
+		Object obj = trackResponseHandler.getBanyanResponse(600);
 		return obj;
 	}
 

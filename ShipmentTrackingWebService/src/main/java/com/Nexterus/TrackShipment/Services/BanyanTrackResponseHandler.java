@@ -35,23 +35,31 @@ public class BanyanTrackResponseHandler {
 	@Autowired
 	BanyanTrackingResponseRepository saveResponseRepo;
 
-	public void handleTrackResponse(JSONObject json) {
+	public void handleTrackResponse(TrackingStatusResponse trackResponse) {
 
+		Gson gson = new Gson();
+		String js = gson.toJson(trackResponse);
+		JSONObject json = new JSONObject();
+		try {
+			json = new JSONObject(js);
+		}
+		catch(JSONException e) {
+			System.err.println(e.getCause().getMessage());
+			return;
+		}
 		try {
 			if (json.getBoolean("Success") == false) {
 				System.out.println("No trackng statuses returned by Banyan");
 				return;
 			}
 			JSONArray statuses = null;
-			Gson gson = new Gson();
 
 			if (!json.has("TrackingStatuses")) {
 				System.out.println("No trackng statuses returned by Banyan");
 				return;
 			} else {
+				saveBanyanTrackResponse(trackResponse);
 				statuses = json.getJSONArray("TrackingStatuses");
-				Object obj = gson.fromJson(json.toString(), Object.class);
-				saveBanyanTrackResponse(obj);
 			}
 
 			for (int i = statuses.length() - 1; i >= 0; i--) {
@@ -66,7 +74,7 @@ public class BanyanTrackResponseHandler {
 		return;
 	}
 
-	public Object getBanyanResponse(int id) {
+	public TrackingStatusResponse getBanyanResponse(int id) {
 
 		TrackingStatusResponse trackResponseSample = new TrackingStatusResponse();
 		Object obj = null;
@@ -79,15 +87,15 @@ public class BanyanTrackResponseHandler {
 		try {
 			ByteArrayInputStream in = new ByteArrayInputStream(banyanTrackResponse.getTrackResponse());
 			ObjectInputStream his = new ObjectInputStream(in);
-			obj = his.readObject();
-			/* trackResponseSample = (TrackingStatusResponse) his.readObject(); */
+			/*obj = his.readObject();*/
+			 trackResponseSample = (TrackingStatusResponse) his.readObject(); 
 		} catch (ClassNotFoundException | IOException e) {
 			System.err.println("Deserialize Track Response " + e.getCause().getMessage());
 		}
-		return obj;
+		return trackResponseSample;
 	}
 
-	public void saveBanyanTrackResponse(Object obj) {
+	public void saveBanyanTrackResponse(TrackingStatusResponse obj) {
 
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ObjectOutput out = null;
