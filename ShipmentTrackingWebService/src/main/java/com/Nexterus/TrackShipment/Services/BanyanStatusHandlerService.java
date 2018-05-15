@@ -16,14 +16,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.Nexterus.TrackShipment.Entities.Booking;
 import com.Nexterus.TrackShipment.Entities.BookingCurrentStatus;
 import com.Nexterus.TrackShipment.Entities.BookingReferences;
 import com.Nexterus.TrackShipment.Entities.BookingStatus;
 import com.Nexterus.TrackShipment.Entities.NxtStatusDates;
+import com.Nexterus.TrackShipment.Models.Banyan.BanyanStatus;
 import com.Nexterus.TrackShipment.Repos.BookingRepository;
 import com.Nexterus.TrackShipment.Repos.BookingStatusRepository;
+import com.google.gson.Gson;
 
 @Service
 public class BanyanStatusHandlerService {
@@ -33,7 +36,20 @@ public class BanyanStatusHandlerService {
 	@Autowired
 	BookingRepository bookRepo;
 
-	public void handleLoadStatus(JSONObject statusResponse, String dt) {
+	@Transactional
+	public void handleLoadStatus(BanyanStatus banStatus) {
+
+		Gson gson = new Gson();
+		String js = gson.toJson(banStatus);
+		JSONObject statusResponse = new JSONObject();
+
+		try {
+			statusResponse = new JSONObject(js);
+		} catch (JSONException e) {
+			System.err.println(e.getCause().getMessage());
+			return;
+		}
+
 		try {
 			Integer loadId = statusResponse.getInt("LoadID");
 			String bolNum = statusResponse.getString("BOL");
@@ -49,6 +65,7 @@ public class BanyanStatusHandlerService {
 				location = city + "," + state;
 			String message = statusResponse.getString("CarrierMessage");
 			String status = statusResponse.getString("Code");
+			String dt = banStatus.getDateTime().toString();
 			String date = dt.substring(0, 10);
 			String time = dt.substring(11, 19);
 			System.out.println("Date: " + date + " Time: " + time);
@@ -58,15 +75,6 @@ public class BanyanStatusHandlerService {
 				dateTime = new java.sql.Timestamp(dateTimeFormatter.parse(date + " " + time).getTime());
 			} catch (ParseException e) {
 				System.err.println(e.getCause() + " " + e.getMessage());
-				dt = "2018-05-15T17:06:13.050+0000";
-				date = dt.substring(0, 10);
-				time = dt.substring(11, 19);
-				System.out.println("Date: " + date + " Time: " + time);
-				try {
-					dateTime = new java.sql.Timestamp(dateTimeFormatter.parse(date + " " + time).getTime());
-				} catch (ParseException e1) {
-					System.err.println(e1.getCause() + " " + e1.getMessage());
-				}
 			}
 
 			List<BigDecimal> bookingIds = new ArrayList<>();

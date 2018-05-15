@@ -10,18 +10,15 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.Nexterus.TrackShipment.Entities.BanyanTrackingResponse;
+import com.Nexterus.TrackShipment.Models.Banyan.BanyanStatus;
 import com.Nexterus.TrackShipment.Models.Banyan.TrackingStatusResponse;
 import com.Nexterus.TrackShipment.Repos.BanyanTrackingResponseRepository;
 import com.Nexterus.TrackShipment.Repos.BookingRepository;
 import com.Nexterus.TrackShipment.Repos.BookingStatusRepository;
-import com.google.gson.Gson;
 
 @Service
 public class BanyanTrackResponseHandler {
@@ -39,54 +36,37 @@ public class BanyanTrackResponseHandler {
 
 	public void handleTrackResponse(TrackingStatusResponse trackResponse) {
 
-		Gson gson = new Gson();
-		String js = gson.toJson(trackResponse);
-		JSONObject json = new JSONObject();
-		
-		List<String> dates = new ArrayList<>();	
-		for(int i=0; i<trackResponse.getTrackingStatuses().size();i++) {
-		String date = trackResponse.getTrackingStatuses().get(i).getDateTime().toString();
-		dates.add(date);
-		}
-	
-		try {
-			json = new JSONObject(js);
-		}
-		catch(JSONException e) {
-			System.err.println(e.getCause().getMessage());
+		if (!trackResponse.isSuccess()) {
+			System.out.println("Banyan Track Status Response has failed");
+			System.err.println("Error: " + trackResponse.getError());
 			return;
 		}
-		try {
-			if (json.getBoolean("Success") == false) {
-				System.out.println("No trackng statuses returned by Banyan");
-				return;
-			}
-			JSONArray statuses = null;
 
-			if (!json.has("TrackingStatuses")) {
-				System.out.println("No trackng statuses returned by Banyan");
-				return;
-			} else {
-				saveBanyanTrackResponse(trackResponse);
-				statuses = json.getJSONArray("TrackingStatuses");
-			}
-
-			for (int i = statuses.length() - 1; i >= 0; i--) {
-				JSONObject statusResponse = statuses.getJSONObject(i);
-				System.out.println(i + " " + statusResponse.getString("Code"));
-				statusHandlerService.handleLoadStatus(statusResponse, dates.get(i));
-			}
-		} catch (JSONException e) {
-			System.out.println(e.getCause() + " " + e.getMessage());
+		if (trackResponse.getTrackingStatuses() == null) {
+			System.out.println("Banyan has returned no Tracking Statuses!");
+			return;
+		} else if (trackResponse.getTrackingStatuses().size() == 0) {
+			System.out.println("Banyan has returned no Tracking Statuses!");
 			return;
 		}
-		return;
+		// Save Banyan Track Response
+		saveBanyanTrackResponse(trackResponse);
+
+		List<BanyanStatus> banyanStatuses = new ArrayList<>();
+		BanyanStatus banStatus = new BanyanStatus();
+		banyanStatuses = trackResponse.getTrackingStatuses();
+
+		for (int i = trackResponse.getTrackingStatuses().size() - 1; i >= 0; i--) {
+			banStatus = banyanStatuses.get(i);
+			System.out.println(i + " " + banStatus.getCode());
+			statusHandlerService.handleLoadStatus(banStatus);
+		}
 	}
 
 	public TrackingStatusResponse getBanyanResponse(int id) {
 
 		TrackingStatusResponse trackResponseSample = new TrackingStatusResponse();
-		Object obj = null;
+		/* Object obj = null; */
 		if (!saveResponseRepo.existsById(id)) {
 			System.out.println("No saved response with given ID");
 			return null;
@@ -96,8 +76,8 @@ public class BanyanTrackResponseHandler {
 		try {
 			ByteArrayInputStream in = new ByteArrayInputStream(banyanTrackResponse.getTrackResponse());
 			ObjectInputStream his = new ObjectInputStream(in);
-			/*obj = his.readObject();*/
-			 trackResponseSample = (TrackingStatusResponse) his.readObject(); 
+			/* obj = his.readObject(); */
+			trackResponseSample = (TrackingStatusResponse) his.readObject();
 		} catch (ClassNotFoundException | IOException e) {
 			System.err.println("Deserialize Track Response " + e.getCause().getMessage());
 		}
