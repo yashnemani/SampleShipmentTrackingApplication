@@ -65,17 +65,6 @@ public class BanyanStatusHandlerService {
 				location = city + "," + state;
 			String message = statusResponse.getString("CarrierMessage");
 			String status = statusResponse.getString("Code");
-			String dt = banStatus.getDateTime().toString();
-			String date = dt.substring(0, 10);
-			String time = dt.substring(11, 19);
-			System.out.println("Date: " + date + " Time: " + time);
-			DateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			java.sql.Timestamp dateTime = null;
-			try {
-				dateTime = new java.sql.Timestamp(dateTimeFormatter.parse(date + " " + time).getTime());
-			} catch (ParseException e) {
-				System.err.println(e.getCause() + " " + e.getMessage());
-			}
 
 			List<BigDecimal> bookingIds = new ArrayList<>();
 			bookingIds = bookStatusRepo.findBookingByReference(3, loadId.toString());
@@ -124,18 +113,33 @@ public class BanyanStatusHandlerService {
 				return;
 			}
 
-			NxtStatusDates statusDates = new NxtStatusDates();
-			if (booking.getStatusDates() != null)
-				statusDates = booking.getStatusDates();
-			else
-				statusDates.setBooking(booking);
-			if (NxtStatus.equals("DL"))
-				statusDates.setDt_delivered(dateTime);
-			else if (NxtStatus.equals("IT")) {
-				if (statusDates.getDt_pickedup() == null)
-					statusDates.setDt_pickedup(dateTime);
+			String dt = null;
+			java.sql.Timestamp dateTime = null;
+			if (banStatus.getDateTime() != null) {
+				dt = banStatus.getDateTime().toString();
+				String date = dt.substring(0, 10);
+				String time = dt.substring(11, 19);
+				System.out.println("Date: " + date + " Time: " + time);
+				DateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				try {
+					dateTime = new java.sql.Timestamp(dateTimeFormatter.parse(date + " " + time).getTime());
+				} catch (ParseException e) {
+					System.err.println(e.getCause() + " " + e.getMessage());
+				}
+
+				NxtStatusDates statusDates = new NxtStatusDates();
+				if (booking.getStatusDates() != null)
+					statusDates = booking.getStatusDates();
+				else
+					statusDates.setBooking(booking);
+				if (NxtStatus.equals("DL"))
+					statusDates.setDt_delivered(dateTime);
+				else if (NxtStatus.equals("IT")) {
+					if (statusDates.getDt_pickedup() == null)
+						statusDates.setDt_pickedup(dateTime);
+				}
+				booking.setStatusDates(statusDates);
 			}
-			booking.setStatusDates(statusDates);
 
 			Set<BookingStatus> bookStatuses = new HashSet<>();
 			BookingStatus bookingStatus = new BookingStatus();
