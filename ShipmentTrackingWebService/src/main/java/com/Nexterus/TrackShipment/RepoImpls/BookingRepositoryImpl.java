@@ -47,4 +47,15 @@ public class BookingRepositoryImpl implements BookingRepositoryCustom {
 		};
 		jdbc.update(sql, prep);
 	}
+
+	@Override
+	public void updateProNumbers() {
+
+		setJdbcTemplate(ds);
+		String sql = "insert into booking_reference(booking_id,REFERENCE_TYPE,reference)"
+				+ "select rt_qte_id,0,pro_no from rate_quote_address where "
+				+ "rt_qte_id in (select booking_id from booking where  booking_id not in (select booking_id from booking_reference where REFERENCE_TYPE=0)) and pro_no is not null";
+		int  r = jdbc.update(sql);
+		System.out.println(r+" rows updated!");
+	}
 }

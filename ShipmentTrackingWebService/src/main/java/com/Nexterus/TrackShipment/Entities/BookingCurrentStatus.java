@@ -1,5 +1,7 @@
 package com.Nexterus.TrackShipment.Entities;
 
+import java.sql.Timestamp;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,7 +19,7 @@ public class BookingCurrentStatus {
 
 	@Id
 	@Column(name = "id")
-	@GeneratedValue(strategy= GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
 	@OneToOne(cascade = CascadeType.ALL)
@@ -42,6 +44,15 @@ public class BookingCurrentStatus {
 
 	@Column(name = "Location")
 	private String location;
+
+	@Column(name = "EST_DLVR_DT")
+	private Timestamp estDeliveryDt;
+
+	@Column(name = "EST_PKUP_DT")
+	private Timestamp estPickupDt;
+
+	@Column(name = "LAST_UPDATED")
+	private Timestamp lastUpdatedDt;
 
 	public BookingCurrentStatus() {
 		super();
@@ -106,5 +117,29 @@ public class BookingCurrentStatus {
 
 	public void setBooking(Booking booking) {
 		this.booking = booking;
+	}
+
+	public Timestamp getEstDeliveryDt() {
+		return estDeliveryDt;
+	}
+
+	public void setEstDeliveryDt(Timestamp estDeliveryDt) {
+		this.estDeliveryDt = estDeliveryDt;
+	}
+
+	public Timestamp getEstPickupDt() {
+		return estPickupDt;
+	}
+
+	public void setEstPickupDt(Timestamp estPickupDt) {
+		this.estPickupDt = estPickupDt;
+	}
+
+	public Timestamp getLastUpdatedDt() {
+		return lastUpdatedDt;
+	}
+
+	public void setLastUpdatedDt() {
+		this.lastUpdatedDt = new Timestamp(System.currentTimeMillis());
 	}
 }

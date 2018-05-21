@@ -30,6 +30,8 @@ public class TrackingResponseHandler {
 	UpsTrackResponseHandler upsHandler;
 	@Autowired
 	BanyanTrackResponseHandler banyanHandler;
+	@Autowired
+	TrackSchedulerService trackSchedulerService;
 
 	@Transactional
 	public void handleTrackingResponse(Object obj, int id, int provider) {
@@ -94,7 +96,7 @@ public class TrackingResponseHandler {
 			}
 			if (EdiStatus.equals("D1") && statusDates.getDt_delivered() == null) {
 				dlvrDate = bookingStatus.getDate();
-				System.out.println("Dlvr Date: "+dlvrDate);
+				System.out.println("Dlvr Date: " + dlvrDate);
 				statusDates.setDt_delivered(dlvrDate);
 			}
 		} else {
@@ -106,7 +108,7 @@ public class TrackingResponseHandler {
 			statusDates.setDt_pickedup(pkupDate);
 			if (EdiStatus.equals("D1")) {
 				dlvrDate = bookingStatus.getDate();
-				System.out.println("Dlvr Date: "+dlvrDate);
+				System.out.println("Dlvr Date: " + dlvrDate);
 				statusDates.setDt_delivered(dlvrDate);
 			}
 		}
@@ -130,11 +132,14 @@ public class TrackingResponseHandler {
 		currentStatus.setShipStatus(EdiStatus);
 		currentStatus.setShipState(NxtStatus);
 		currentStatus.setDate(bookingStatus.getDate());
+		currentStatus.setLastUpdatedDt();
 		booking.setCurrentStatus(currentStatus);
 
 		// Delete Booking from TrackingQueue if status is delivered
-		if (EdiStatus.equals("D1"))
+		if (EdiStatus.equals("D1")) {
+			trackSchedulerService.trackDeliveredCount(provider);
 			bookRepo.deleteFromTrackingQueue(id);
+		}
 
 		bookRepo.save(booking);
 		bookRepo.refresh(booking);

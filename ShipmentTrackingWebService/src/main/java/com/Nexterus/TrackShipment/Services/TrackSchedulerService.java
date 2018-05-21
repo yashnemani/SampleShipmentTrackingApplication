@@ -19,21 +19,26 @@ public class TrackSchedulerService {
 	@Autowired
 	BookingRepository bookRepo;
 
-	Integer XPO_Batch = 4;
-	Integer UPS_Batch = 1;
+	Integer XPO_Batch = 11;
+	Integer UPS_Batch = 9;
 
-	@Scheduled(cron = "0 1 * * * ?")
+	Integer xpoDlvrCount = 2;
+	Integer upsDlvrCount = 0;
+
+	@Scheduled(cron = "0 40 * * * ?")
 	public void banyanTrackingScheduler() {
 		trackController.getBanyanStatuses();
 	}
 
-	@Scheduled(cron = "0 0/20 * * * ?")
+	@Scheduled(cron = "0 0/6 * * * ?")
 	public void XPO_TrackingScheduler() {
 
 		List<BigDecimal> trackIds = new ArrayList<>();
 		trackIds = bookRepo.getTrackIdsFromQueue(1);
 		int batchSize = trackIds.size() / 10;
-		System.out.println("Track Size: "+trackIds.size()+" BatchSize: "+batchSize);
+		if (trackIds.size() % 10 == 0)
+			batchSize = batchSize - 1;
+		System.out.println("Track Size: " + trackIds.size() + " BatchSize: " + batchSize);
 		int min, max = 0;
 		if (XPO_Batch < batchSize) {
 			min = XPO_Batch * 10;
@@ -42,13 +47,18 @@ public class TrackSchedulerService {
 			min = XPO_Batch * 10;
 			max = trackIds.size();
 		}
-		
+
 		System.out.println();
 		System.out.println("XPO Tracking ........");
-		System.out.println("Batch: "+XPO_Batch);
-		
+		System.out.println("Batch: " + XPO_Batch);
+		if (min != 0) {
+			min = min - xpoDlvrCount;
+			System.out.println("Shipments delivered in previous Batch " + xpoDlvrCount);
+			System.out.println("Adjusting Batch Size accordingly...... New min is " + min);
+		}
+		xpoDlvrCount = 0;
 		for (int i = min; i < max; i++) {
-			System.out.println("Tracking ID: "+trackIds.get(i));
+			System.out.println("Tracking ID: " + trackIds.get(i));
 			trackController.getXPOStatus(trackIds.get(i).toString(), 0);
 		}
 		if (XPO_Batch < batchSize)
@@ -57,13 +67,15 @@ public class TrackSchedulerService {
 			XPO_Batch = 0;
 	}
 
-	@Scheduled(cron = "0 0/30 * * * ?")
+	@Scheduled(cron = "0 0/7 * * * ?")
 	public void UPS_TrackingScheduler() {
 
 		List<BigDecimal> trackIds = new ArrayList<>();
 		trackIds = bookRepo.getTrackIdsFromQueue(2);
 		int batchSize = trackIds.size() / 10;
-		System.out.println("Track Size: "+trackIds.size()+" BatchSize: "+batchSize);
+		if (trackIds.size() % 10 == 0)
+			batchSize = batchSize - 1;
+		System.out.println("Track Size: " + trackIds.size() + " BatchSize: " + batchSize);
 		int min, max = 0;
 		if (UPS_Batch < batchSize) {
 			min = UPS_Batch * 10;
@@ -74,15 +86,35 @@ public class TrackSchedulerService {
 		}
 		System.out.println();
 		System.out.println("UPS Tracking ........");
-		System.out.println("Batch: "+UPS_Batch);
-		
+		System.out.println("Batch: " + UPS_Batch);
+
+		if (min != 0) {
+			min = min - upsDlvrCount;
+			System.out.println("Shipments delivered in previous Batch " + upsDlvrCount);
+			System.out.println("Adjusting Batch Size accordingly...... New min is " + min);
+		}
+		upsDlvrCount = 0;
+
 		for (int i = min; i < max; i++) {
-			System.out.println("Tracking ID: "+trackIds.get(i));
+			System.out.println("Tracking ID: " + trackIds.get(i));
 			trackController.getUPSstatus(trackIds.get(i).toString(), 0);
 		}
 		if (UPS_Batch < batchSize)
 			UPS_Batch++;
 		else
 			UPS_Batch = 0;
+	}
+
+	public void trackDeliveredCount(int provider) {
+
+		if (provider == 1)
+			xpoDlvrCount++;
+		if (provider == 2)
+			upsDlvrCount++;
+	}
+
+	@Scheduled(cron = "0 25 * * * ?")
+	public void updateProNumbers() {
+		bookRepo.updateProNumbers();
 	}
 }

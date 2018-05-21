@@ -130,7 +130,7 @@ public class TrackingController {
 		String refNum = null;
 		if (type == 0) {
 			id = Integer.parseInt(ref);
-			refNum = refNumService.getRefNum(id);
+			refNum = refNumService.getRefNum(id,1);
 			if (refNum.length() > 20)
 				return refNum;
 		} else
@@ -152,6 +152,10 @@ public class TrackingController {
 			return response.getBody();
 		} catch (HttpClientErrorException e) {
 			System.out.println(e.getStatusCode());
+			if (e.getStatusCode().value() == 401) {
+				authToken = getXPOBearerToken();
+				getXPOStatus(ref, type);
+			}
 			System.out.println(e.getResponseBodyAsString());
 			System.out.println(e.getResponseHeaders());
 			return e.getResponseBodyAsString();
@@ -166,7 +170,7 @@ public class TrackingController {
 		String refNum = null;
 		if (type == 0) {
 			id = Integer.parseInt(ref);
-			refNum = refNumService.getRefNum(id);
+			refNum = refNumService.getRefNum(id,2);
 			if (refNum.length() > 20)
 				return refNum;
 		} else
@@ -175,6 +179,7 @@ public class TrackingController {
 		trackRequest.setInquiryNumber(refNum);
 		UPSTrackRequest.setTrackRequest(trackRequest);
 		String url = "https://wwwcie.ups.com/rest/Track";
+		 String prodUrl = "https://onlinetools.ups.com/rest/Track"; 
 
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
@@ -183,7 +188,7 @@ public class TrackingController {
 
 		HttpEntity<UPS_TrackRequest> entity = new HttpEntity<>(UPSTrackRequest, headers);
 		try {
-			ResponseEntity<Object> response = restTemplate.exchange(url, HttpMethod.POST, entity, Object.class);
+			ResponseEntity<Object> response = restTemplate.exchange(prodUrl, HttpMethod.POST, entity, Object.class);
 			if (id != 0)
 				trackResponseService.handleTrackingResponse(response.getBody(), id, 2);
 			return response.getBody();

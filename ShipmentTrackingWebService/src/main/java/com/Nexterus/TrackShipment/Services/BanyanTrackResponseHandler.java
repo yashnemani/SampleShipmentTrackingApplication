@@ -37,16 +37,16 @@ public class BanyanTrackResponseHandler {
 	public void handleTrackResponse(TrackingStatusResponse trackResponse) {
 
 		if (!trackResponse.isSuccess()) {
-			System.out.println("Banyan Track Status Response has failed");
+			System.err.println("Banyan Track Status Response has failed");
 			System.err.println("Error: " + trackResponse.getError());
 			return;
 		}
 
 		if (trackResponse.getTrackingStatuses() == null) {
-			System.out.println("Banyan has returned no Tracking Statuses!");
+			System.err.println("Banyan has returned no Tracking Statuses!");
 			return;
 		} else if (trackResponse.getTrackingStatuses().size() == 0) {
-			System.out.println("Banyan has returned no Tracking Statuses!");
+			System.err.println("Banyan has returned no Tracking Statuses!");
 			return;
 		}
 		// Save Banyan Track Response
@@ -66,7 +66,6 @@ public class BanyanTrackResponseHandler {
 	public TrackingStatusResponse getBanyanResponse(int id) {
 
 		TrackingStatusResponse trackResponseSample = new TrackingStatusResponse();
-		/* Object obj = null; */
 		if (!saveResponseRepo.existsById(id)) {
 			System.out.println("No saved response with given ID");
 			return null;
@@ -76,7 +75,6 @@ public class BanyanTrackResponseHandler {
 		try {
 			ByteArrayInputStream in = new ByteArrayInputStream(banyanTrackResponse.getTrackResponse());
 			ObjectInputStream his = new ObjectInputStream(in);
-			/* obj = his.readObject(); */
 			trackResponseSample = (TrackingStatusResponse) his.readObject();
 		} catch (ClassNotFoundException | IOException e) {
 			System.err.println("Deserialize Track Response " + e.getCause().getMessage());

@@ -1,6 +1,7 @@
 package com.Nexterus.TrackShipment.Services;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -163,6 +164,12 @@ public class BanyanStatusHandlerService {
 			currentStatus.setShipStatus(EdiStatus);
 			currentStatus.setShipState(NxtStatus);
 			currentStatus.setDate(dateTime);
+			currentStatus.setLastUpdatedDt();
+
+			if (EdiStatus.equals("AG")) {
+				currentStatus.setDate(new Timestamp(System.currentTimeMillis()));
+				currentStatus.setEstDeliveryDt(dateTime);
+			}
 			booking.setCurrentStatus(currentStatus);
 
 			// Delete Booking from TrackingQueue if status is delivered
