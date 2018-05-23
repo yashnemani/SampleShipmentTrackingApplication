@@ -14,21 +14,40 @@ import com.Nexterus.TrackShipment.Entities.BookingStatus;
 @Service
 public class UpsTrackResponseHandler {
 
+	String pro = null;
+
 	public BookingStatus handleTrackResponse(JSONObject json) {
 
 		String status = null;
 		String message = null;
 		String location = null;
 		java.sql.Timestamp timestamp = null;
+
 		try {
 			if (json.has("Fault")) {
 				System.out.println("UPS FAULT!!");
+				try {
+					String error = json.getJSONObject("Fault").getJSONObject("detail").getJSONObject("Errors")
+							.getJSONObject("ErrorDetail").getJSONObject("PrimaryErrorCode").getString("Description");
+					System.err.println(error);
+				} catch (JSONException e) {
+					System.out.println(e.getCause() + " " + e.getMessage());
+				}
 				return null;
 			}
 			JSONObject jsob;
 			jsob = json.getJSONObject("TrackResponse").getJSONObject("Shipment");
+			try {
+				pro = jsob.getJSONObject("InquiryNumber").getString("Value");
+			} catch (JSONException e) {
+				System.out.println(e.getCause() + " " + e.getMessage());
+			}
 			status = jsob.getJSONObject("CurrentStatus").getString("Code");
-			location = jsob.getJSONObject("ShipmentAddress").getJSONObject("Address").getString("PostalCode");
+			try {
+				location = jsob.getJSONObject("ShipmentAddress").getJSONObject("Address").getString("PostalCode");
+			} catch (JSONException e) {
+				System.out.println(e.getCause() + " " + e.getMessage());
+			}
 			message = jsob.getJSONObject("CurrentStatus").getString("Description");
 
 			JSONArray jArr = new JSONArray();
@@ -101,5 +120,9 @@ public class UpsTrackResponseHandler {
 			return null;
 		}
 		return pkupDate;
+	}
+
+	public String getPro() {
+		return pro;
 	}
 }

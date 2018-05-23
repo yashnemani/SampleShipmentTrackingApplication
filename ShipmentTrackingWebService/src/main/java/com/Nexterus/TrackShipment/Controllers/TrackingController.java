@@ -2,8 +2,6 @@ package com.Nexterus.TrackShipment.Controllers;
 
 import java.util.Arrays;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -24,6 +22,7 @@ import org.springframework.web.client.RestTemplate;
 import com.Nexterus.TrackShipment.Models.Banyan.AuthenticationData;
 import com.Nexterus.TrackShipment.Models.Banyan.TrackingStatusRequest;
 import com.Nexterus.TrackShipment.Models.Banyan.TrackingStatusResponse;
+import com.Nexterus.TrackShipment.Models.UPS.ReferenceNumber;
 import com.Nexterus.TrackShipment.Models.UPS.TrackRequest;
 import com.Nexterus.TrackShipment.Models.UPS.UPS_TrackRequest;
 import com.Nexterus.TrackShipment.Models.XPO.OAuth2Token;
@@ -45,6 +44,8 @@ public class TrackingController {
 	OAuth2Token authToken;
 	@Autowired
 	UPS_TrackRequest UPSTrackRequest;
+	@Autowired
+	UPS_TrackRequest UPSTrackRequest1;
 	@Autowired
 	TrackRequest trackRequest;
 	@Autowired
@@ -130,7 +131,7 @@ public class TrackingController {
 		String refNum = null;
 		if (type == 0) {
 			id = Integer.parseInt(ref);
-			refNum = refNumService.getRefNum(id,1);
+			refNum = refNumService.getRefNum(id, 1);
 			if (refNum.length() > 20)
 				return refNum;
 		} else
@@ -170,23 +171,27 @@ public class TrackingController {
 		String refNum = null;
 		if (type == 0) {
 			id = Integer.parseInt(ref);
-			refNum = refNumService.getRefNum(id,2);
-			if (refNum.length() > 20)
-				return refNum;
-		} else
+			UPSTrackRequest1 = refNumService.get_UPS_TrackRefs(id, 2);
+			if (UPSTrackRequest1 == null)
+				return null;
+		} else {
 			refNum = ref;
+			ReferenceNumber refnum = new ReferenceNumber();
+			refnum.setValue(refNum);
+			trackRequest.setRefNum(refnum);
+			trackRequest.setInquiryNumber(null);
+			UPSTrackRequest1.setTrackRequest(trackRequest);
+		}
 
-		trackRequest.setInquiryNumber(refNum);
-		UPSTrackRequest.setTrackRequest(trackRequest);
 		String url = "https://wwwcie.ups.com/rest/Track";
-		 String prodUrl = "https://onlinetools.ups.com/rest/Track"; 
+		String prodUrl = "https://onlinetools.ups.com/rest/Track";
 
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
-		HttpEntity<UPS_TrackRequest> entity = new HttpEntity<>(UPSTrackRequest, headers);
+		HttpEntity<UPS_TrackRequest> entity = new HttpEntity<>(UPSTrackRequest1, headers);
 		try {
 			ResponseEntity<Object> response = restTemplate.exchange(prodUrl, HttpMethod.POST, entity, Object.class);
 			if (id != 0)
@@ -227,5 +232,17 @@ public class TrackingController {
 			banyanTrackResponseHandler.handleTrackResponse(banyanTrackResponseHandler.getBanyanResponse(id));
 		else
 			banyanTrackResponseHandler.handleTrackResponse(sampleService.getSampleBanyanTrackresponse());
+	}
+
+	@GetMapping("/getUpsRequest/{id}")
+	public UPS_TrackRequest getUpsTrackRequest(@PathVariable int id) {
+
+		// Default
+		UPSTrackRequest.setTrackRequest(trackRequest);
+		if (id == 0)
+			return UPSTrackRequest;
+		// Test
+		UPSTrackRequest = refNumService.get_UPS_TrackRefs(id, 2);
+		return UPSTrackRequest;
 	}
 }

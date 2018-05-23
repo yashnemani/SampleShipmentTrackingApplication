@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.Nexterus.TrackShipment.Entities.Booking;
 import com.Nexterus.TrackShipment.Entities.BookingCurrentStatus;
+import com.Nexterus.TrackShipment.Entities.BookingReferences;
 import com.Nexterus.TrackShipment.Entities.BookingStatus;
 import com.Nexterus.TrackShipment.Entities.NxtStatusDates;
 import com.Nexterus.TrackShipment.Repos.BookingRepository;
@@ -134,6 +135,20 @@ public class TrackingResponseHandler {
 		currentStatus.setDate(bookingStatus.getDate());
 		currentStatus.setLastUpdatedDt();
 		booking.setCurrentStatus(currentStatus);
+
+		if (provider == 2) {
+			if (booking.getReferences() != null) {
+				if (!booking.getReferences().stream().filter(a -> a.getRef_type() == 0).findFirst().isPresent()) {
+					if (upsHandler.getPro() != null) {
+						BookingReferences refs = new BookingReferences();
+						refs.setBooking(booking);
+						refs.setRef_type(0);
+						refs.setReference(upsHandler.getPro());
+						booking.getReferences().add(refs);
+					}
+				}
+			}
+		}
 
 		// Delete Booking from TrackingQueue if status is delivered
 		if (EdiStatus.equals("D1")) {

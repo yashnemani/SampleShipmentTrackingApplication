@@ -19,10 +19,10 @@ public class TrackSchedulerService {
 	@Autowired
 	BookingRepository bookRepo;
 
-	Integer XPO_Batch = 11;
-	Integer UPS_Batch = 9;
+	Integer XPO_Batch = 19;
+	Integer UPS_Batch = 5;
 
-	Integer xpoDlvrCount = 2;
+	Integer xpoDlvrCount = 0;
 	Integer upsDlvrCount = 0;
 
 	@Scheduled(cron = "0 40 * * * ?")
@@ -67,7 +67,7 @@ public class TrackSchedulerService {
 			XPO_Batch = 0;
 	}
 
-	@Scheduled(cron = "0 0/7 * * * ?")
+	@Scheduled(cron = "0 0/11 * * * ?")
 	public void UPS_TrackingScheduler() {
 
 		List<BigDecimal> trackIds = new ArrayList<>();
@@ -113,7 +113,7 @@ public class TrackSchedulerService {
 			upsDlvrCount++;
 	}
 
-	@Scheduled(cron = "0 25 * * * ?")
+	@Scheduled(cron = "0 32 * * * ?")
 	public void updateProNumbers() {
 		bookRepo.updateProNumbers();
 	}
