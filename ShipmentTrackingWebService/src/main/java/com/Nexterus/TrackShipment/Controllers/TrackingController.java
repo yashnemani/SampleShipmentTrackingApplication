@@ -34,6 +34,8 @@ import com.Nexterus.TrackShipment.Services.GetCurrentStatus;
 import com.Nexterus.TrackShipment.Services.GetRefNum;
 import com.Nexterus.TrackShipment.Services.SampleBanyanTrackResponse;
 import com.Nexterus.TrackShipment.Services.TrackingResponseHandler;
+import com.Nexterus.TrackShipment.Services.UPS_UpdateActivity;
+import com.Nexterus.TrackShipment.Services.XPO_UpdateEvents;
 import com.google.gson.Gson;
 
 @RestController
@@ -62,6 +64,10 @@ public class TrackingController {
 	SampleBanyanTrackResponse sampleService;
 	@Autowired
 	BanyanStatusHandlerService statusHandlerService;
+	@Autowired
+	UPS_UpdateActivity updateActivitySerrvice;
+	@Autowired
+	XPO_UpdateEvents xpoEventService;
 
 	// Get a list of all updated Banyan shipment statuses
 	@GetMapping("/getBanyanStatuses")
@@ -121,8 +127,8 @@ public class TrackingController {
 	}
 
 	// Get the XPO shipment status for a given reference
-	@GetMapping("/getXPOStatus/{ref}/{type}")
-	public Object getXPOStatus(@PathVariable String ref, @PathVariable int type) {
+	@GetMapping("/getXPOStatus/{ref}/{type}/{update}")
+	public Object getXPOStatus(@PathVariable String ref, @PathVariable int type, @PathVariable boolean update) {
 
 		if (authToken.getAccessToken() == null) {
 			authToken = getXPOBearerToken();
@@ -141,6 +147,8 @@ public class TrackingController {
 		RestTemplate restTemplate = new RestTemplate();
 		String url1 = "https://api.ltl.xpo.com/tracking/1.0/shipments/shipment-status-details?referenceNumbers="
 				+ refNum;
+		if (update == true)
+			url1 = "https://api.ltl.xpo.com/tracking/1.0/shipments/" + refNum + "/tracking-events";
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Authorization", accessToken);
@@ -148,6 +156,10 @@ public class TrackingController {
 		HttpEntity<HttpHeaders> entity = new HttpEntity<>(headers);
 		try {
 			ResponseEntity<Object> response = restTemplate.exchange(url1, HttpMethod.GET, entity, Object.class);
+			if (update == true) {
+				xpoEventService.updateEvents(response.getBody(), id, 1);
+				return response.getBody();
+			}
 			if (id != 0)
 				trackResponseService.handleTrackingResponse(response.getBody(), id, 1);
 			return response.getBody();
@@ -155,7 +167,7 @@ public class TrackingController {
 			System.out.println(e.getStatusCode());
 			if (e.getStatusCode().value() == 401) {
 				authToken = getXPOBearerToken();
-				getXPOStatus(ref, type);
+				getXPOStatus(ref, type, update);
 			}
 			System.out.println(e.getResponseBodyAsString());
 			System.out.println(e.getResponseHeaders());
@@ -164,8 +176,8 @@ public class TrackingController {
 	}
 
 	// Get the UPS shipment status for a given reference
-	@PostMapping("/getUPSStatus/{ref}/{type}")
-	public Object getUPSstatus(@PathVariable String ref, @PathVariable int type) {
+	@PostMapping("/getUPSStatus/{ref}/{type}/{update}")
+	public Object getUPSstatus(@PathVariable String ref, @PathVariable int type, boolean update) {
 
 		int id = 0;
 		String refNum = null;
@@ -194,6 +206,10 @@ public class TrackingController {
 		HttpEntity<UPS_TrackRequest> entity = new HttpEntity<>(UPSTrackRequest1, headers);
 		try {
 			ResponseEntity<Object> response = restTemplate.exchange(prodUrl, HttpMethod.POST, entity, Object.class);
+			if (update == true) {
+				updateActivitySerrvice.updateActivity(response.getBody(), id, 2);
+				return response.getBody();
+			}
 			if (id != 0)
 				trackResponseService.handleTrackingResponse(response.getBody(), id, 2);
 			return response.getBody();

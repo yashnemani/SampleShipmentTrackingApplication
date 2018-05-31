@@ -19,7 +19,7 @@ public interface BookingStatusRepository extends CrudRepository<BookingStatus, I
 
 	@Query(nativeQuery = true, value = "select NXT_STATUS_CODE from EDI_STATUS_CODES where EDI_STATUS_CODE=:code")
 	String findNxtStatus(@Param("code") String code);
-	
+
 	@Query(nativeQuery = true, value = "select booking_ID from Booking_Reference where Reference_Type=:type and reference=:ref")
-	List<BigDecimal> findBookingByReference(@Param("type")int type, @Param("ref")String ref);
+	List<BigDecimal> findBookingByReference(@Param("type") int type, @Param("ref") String ref);
 }

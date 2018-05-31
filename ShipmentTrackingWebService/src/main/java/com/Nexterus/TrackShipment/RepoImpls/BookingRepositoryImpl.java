@@ -56,6 +56,6 @@ public class BookingRepositoryImpl implements BookingRepositoryCustom {
 				+ "select rt_qte_id,0,pro_no from rate_quote_address where "
 				+ "rt_qte_id in (select booking_id from booking where  booking_id not in (select booking_id from booking_reference where REFERENCE_TYPE=0) and provider_id!=0) and pro_no is not null";
 		int  r = jdbc.update(sql);
-		System.out.println(r+" rows updated!");
+		System.out.println(r+" Pro Number/s updated!");
 	}
 }

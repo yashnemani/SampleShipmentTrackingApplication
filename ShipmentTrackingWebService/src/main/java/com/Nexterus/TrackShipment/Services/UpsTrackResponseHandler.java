@@ -1,5 +1,6 @@
 package com.Nexterus.TrackShipment.Services;
 
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -15,13 +16,14 @@ import com.Nexterus.TrackShipment.Entities.BookingStatus;
 public class UpsTrackResponseHandler {
 
 	String pro = null;
+	Timestamp estDlvr = null;
 
 	public BookingStatus handleTrackResponse(JSONObject json) {
 
 		String status = null;
 		String message = null;
 		String location = null;
-		java.sql.Timestamp timestamp = null;
+		Timestamp timestamp = null;
 
 		try {
 			if (json.has("Fault")) {
@@ -56,19 +58,57 @@ public class UpsTrackResponseHandler {
 			String time = null;
 			try {
 				jArr = jsob.getJSONArray("DeliveryDetail");
-				dt = jArr.getJSONObject(0).getString("Date");
-				time = jArr.getJSONObject(0).getString("Time");
+				if (jArr.getJSONObject(0).getJSONObject("Type").getString("Description").equals("Estimated Delivery")) {
+					dt = jArr.getJSONObject(0).getString("Date");
+					time = jArr.getJSONObject(0).getString("Time");
+				}
 			} catch (JSONException e) {
 				System.out.println(e.getCause() + " " + e.getMessage());
-			}
-			if (dt == null)
 				try {
 					jsObj = jsob.getJSONObject("DeliveryDetail");
+					if (jsObj.getJSONObject("Type").getString("Description").equals("Estimated Delivery")) {
+						dt = jsObj.getString("Date");
+						time = jsObj.getString("Time");
+					}
+				} catch (JSONException e1) {
+					System.out.println(e1.getCause() + " " + e1.getMessage());
+				}
+			}
+
+			if (dt != null) {
+				String year = dt.substring(0, 4);
+				String month = dt.substring(4, 6);
+				String day = dt.substring(6, 8);
+				String hour = time.substring(0, 2);
+				String minutes = time.substring(2, 4);
+				String sec = time.substring(4, 6);
+				DateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+				try {
+					estDlvr = new java.sql.Timestamp(dateTimeFormatter
+							.parse(year + "-" + month + "-" + day + " " + hour + ":" + minutes + ":" + sec).getTime());
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+			}
+			dt = null;
+			try {
+				jArr = jsob.getJSONArray("Activity");
+				dt = jArr.getJSONObject(0).getString("Date");
+				time = jArr.getJSONObject(0).getString("Time");
+				message = jArr.getJSONObject(0).getString("Description");
+			} catch (JSONException e) {
+				System.out.println(e.getCause() + " " + e.getMessage());
+				try {
+					jsObj = jsob.getJSONObject("Activity");
 					dt = jsObj.getString("Date");
 					time = jsObj.getString("Time");
-				} catch (JSONException e) {
-					System.out.println(e.getCause() + " " + e.getMessage());
+					message = jsObj.getString("Description");
+				} catch (JSONException e1) {
+					System.out.println(e1.getCause() + " " + e1.getMessage());
 				}
+			}
+
 			if (dt != null) {
 				String year = dt.substring(0, 4);
 				String month = dt.substring(4, 6);
@@ -81,7 +121,6 @@ public class UpsTrackResponseHandler {
 				try {
 					timestamp = new java.sql.Timestamp(dateTimeFormatter
 							.parse(year + "-" + month + "-" + day + " " + hour + ":" + minutes + ":" + sec).getTime());
-					System.out.println(timestamp);
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
@@ -111,7 +150,6 @@ public class UpsTrackResponseHandler {
 			try {
 				pkupDate = new java.sql.Timestamp(
 						dateTimeFormatter.parse(year + "-" + month + "-" + day + " " + "00:00:00").getTime());
-				System.out.println(pkupDate);
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
@@ -123,6 +161,14 @@ public class UpsTrackResponseHandler {
 	}
 
 	public String getPro() {
-		return pro;
+		String pro1 = pro;
+		pro = null;
+		return pro1;
+	}
+
+	public Timestamp getEstDelivery() {
+		Timestamp estDlvr1 = estDlvr;
+		estDlvr = null;
+		return estDlvr1;
 	}
 }

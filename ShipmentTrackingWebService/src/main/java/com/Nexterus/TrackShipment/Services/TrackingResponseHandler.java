@@ -1,5 +1,6 @@
 package com.Nexterus.TrackShipment.Services;
 
+import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -134,6 +135,15 @@ public class TrackingResponseHandler {
 		currentStatus.setShipState(NxtStatus);
 		currentStatus.setDate(bookingStatus.getDate());
 		currentStatus.setLastUpdatedDt();
+		if (provider == 1) {
+			Timestamp xpoEstDelivery = xpoHandler.getEstDeliveryDt();
+			if (xpoEstDelivery != null)
+				currentStatus.setEstDeliveryDt(xpoEstDelivery);
+		} else if (provider == 2) {
+			Timestamp upsEstDelivery = upsHandler.getEstDelivery();
+			if (upsEstDelivery != null)
+				currentStatus.setEstDeliveryDt(upsEstDelivery);
+		}
 		booking.setCurrentStatus(currentStatus);
 
 		if (provider == 2) {
@@ -151,7 +161,7 @@ public class TrackingResponseHandler {
 		}
 
 		// Delete Booking from TrackingQueue if status is delivered
-		if (EdiStatus.equals("D1")) {
+		if (EdiStatus.equals("D1") || EdiStatus.equals("CA")) {
 			trackSchedulerService.trackDeliveredCount(provider);
 			bookRepo.deleteFromTrackingQueue(id);
 		}
