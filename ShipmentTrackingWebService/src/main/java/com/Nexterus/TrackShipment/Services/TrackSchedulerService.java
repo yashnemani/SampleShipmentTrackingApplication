@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -19,10 +20,8 @@ public class TrackSchedulerService {
 	@Autowired
 	BookingRepository bookRepo;
 
-	Integer XPO_Batch = 0;
-	Integer UPS_Batch = 0;
-	Integer Update_Batch = 20;
-
+	Integer XPO_Batch = 8;
+	Integer UPS_Batch = 7;
 	Integer xpoDlvrCount = 0;
 	Integer upsDlvrCount = 0;
 
@@ -31,7 +30,7 @@ public class TrackSchedulerService {
 		trackController.getBanyanStatuses();
 	}
 
-	 @Scheduled(cron = "0 0/6 * * * ?") 
+	 @Scheduled(cron = "0 0/4 * * * ?") 
 	public void XPO_TrackingScheduler() {
 
 		List<BigDecimal> trackIds = new ArrayList<>();
@@ -58,6 +57,7 @@ public class TrackSchedulerService {
 			System.out.println("Adjusting Batch Size accordingly...... New min is " + min);
 		}
 		xpoDlvrCount = 0;
+		Logger.info("Processing a new XPO Batch from TrackingQueue... Batch:"+XPO_Batch);
 		for (int i = min; i < max; i++) {
 			System.out.println("Tracking ID: " + trackIds.get(i));
 			trackController.getXPOStatus(trackIds.get(i).toString(), 0, true);
@@ -68,7 +68,7 @@ public class TrackSchedulerService {
 			XPO_Batch = 0;
 	}
 
-	 @Scheduled(cron = "0 0/8 * * * ?") 
+	 @Scheduled(cron = "0 0/6 * * * ?") 
 	public void UPS_TrackingScheduler() {
 
 		List<BigDecimal> trackIds = new ArrayList<>();
@@ -95,7 +95,7 @@ public class TrackSchedulerService {
 			System.out.println("Adjusting Batch Size accordingly...... New min is " + min);
 		}
 		upsDlvrCount = 0;
-
+		Logger.info("Processing a new UPS Batch from TrackingQueue... Batch:"+UPS_Batch);
 		for (int i = min; i < max; i++) {
 			System.out.println("Tracking ID: " + trackIds.get(i));
 			trackController.getUPSstatus(trackIds.get(i).toString(), 0, true);
@@ -107,7 +107,6 @@ public class TrackSchedulerService {
 	}
 
 	public void trackDeliveredCount(int provider) {
-
 		if (provider == 1)
 			xpoDlvrCount++;
 		if (provider == 2)
@@ -118,34 +117,4 @@ public class TrackSchedulerService {
 	public void updateProNumbers() {
 		bookRepo.updateProNumbers();
 	}
-
-/*	@Scheduled(cron = "0 0/10 * * * ?")
-	public void ups_updateActivity() {
-		List<BigDecimal> deliveredIds = new ArrayList<>();
-		deliveredIds = bookRepo.findDeliveredBookingsByProvider(2);
-		int batchSize = deliveredIds.size() / 10;
-		if (deliveredIds.size() % 10 == 0)
-			batchSize = batchSize - 1;
-		System.out.println("Track Size: " + deliveredIds.size() + " BatchSize: " + batchSize);
-		int min, max = 0;
-		if (Update_Batch < batchSize) {
-			min = Update_Batch * 10;
-			max = min + 10;
-		} else {
-			min = Update_Batch * 10;
-			max = deliveredIds.size();
-		}
-		System.out.println();
-		System.out.println("Update Activity ........");
-		System.out.println("Batch: " + Update_Batch);
-
-		for (int i = min; i < max; i++) {
-			System.out.println("ID: " + deliveredIds.get(i));
-			trackController.getUPSstatus(deliveredIds.get(i).toString(), 0, true);
-		}
-		if (Update_Batch < batchSize)
-			Update_Batch++;
-		else
-			Update_Batch = 0;
-	}*/
 }

@@ -70,7 +70,7 @@ public class BanyanStatusHandlerService {
 			List<BigDecimal> bookingIds = new ArrayList<>();
 			bookingIds = bookStatusRepo.findBookingByReference(3, loadId.toString());
 			if (bookingIds.isEmpty()) {
-				System.out.println("No Booking found with the following Load ID as Reference");
+				System.out.println("No Booking found with the following Load ID"+loadId+" as Reference");
 				return;
 			}
 			System.out.println(bookingIds.get(0));
@@ -142,15 +142,15 @@ public class BanyanStatusHandlerService {
 				booking.setStatusDates(statusDates);
 			}
 
-			Set<BookingStatus> bookStatuses = new HashSet<>();
+			List<BookingStatus> statuses = new ArrayList<>();
 			BookingStatus bookingStatus = new BookingStatus();
 			bookingStatus.setLocation(location);
 			bookingStatus.setMessage(message);
 			bookingStatus.setDate(dateTime);
 			bookingStatus.setStatus(EdiStatus);
 			bookingStatus.setBooking(booking);
-			bookStatuses.add(bookingStatus);
-			booking.setStatuses(bookStatuses);
+			statuses.add(bookingStatus);
+			booking.setStatuses(statuses);
 
 			BookingCurrentStatus currentStatus = new BookingCurrentStatus();
 			if (booking.getCurrentStatus() != null) {

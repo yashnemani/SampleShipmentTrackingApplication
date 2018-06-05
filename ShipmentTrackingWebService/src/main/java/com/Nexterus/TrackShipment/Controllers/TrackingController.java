@@ -3,6 +3,7 @@ package com.Nexterus.TrackShipment.Controllers;
 import java.util.Arrays;
 
 import org.json.JSONObject;
+import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -94,6 +95,7 @@ public class TrackingController {
 		} catch (HttpClientErrorException e) {
 			System.out.println(e.getStatusCode());
 			System.out.println(e.getResponseBodyAsString());
+			Logger.info("Banyan Tracking Request failed! Error " + e.getMessage());
 			return null;
 		}
 
@@ -171,6 +173,8 @@ public class TrackingController {
 			}
 			System.out.println(e.getResponseBodyAsString());
 			System.out.println(e.getResponseHeaders());
+			if(e.getMessage()!=null)
+			Logger.info("XPO Tracking Request failed for " + ref + " Error " + e.getMessage());
 			return e.getResponseBodyAsString();
 		}
 	}
@@ -195,7 +199,7 @@ public class TrackingController {
 			UPSTrackRequest1.setTrackRequest(trackRequest);
 		}
 
-		String url = "https://wwwcie.ups.com/rest/Track";
+		/* String url = "https://wwwcie.ups.com/rest/Track"; */
 		String prodUrl = "https://onlinetools.ups.com/rest/Track";
 
 		RestTemplate restTemplate = new RestTemplate();
@@ -216,6 +220,7 @@ public class TrackingController {
 		} catch (HttpClientErrorException e) {
 			System.out.println(e.getStatusCode());
 			System.out.println(e.getResponseBodyAsString());
+			Logger.info("UPS Tracking Request failed for " + ref + " Error " + e.getMessage());
 			return e.getResponseBodyAsString();
 		}
 	}

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -48,7 +49,7 @@ public class Booking implements Persistable<Integer> {
 	private Set<BookingReferences> references;
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "booking", cascade = CascadeType.ALL)
-	private Set<BookingStatus> statuses;
+	private List<BookingStatus> statuses;
 
 	@OneToOne(fetch = FetchType.EAGER, mappedBy = "booking", cascade = CascadeType.MERGE)
 	private BookingCurrentStatus currentStatus;
@@ -135,11 +136,11 @@ public class Booking implements Persistable<Integer> {
 		this.references = references;
 	}
 
-	public Set<BookingStatus> getStatuses() {
+	public List<BookingStatus> getStatuses() {
 		return statuses;
 	}
 
-	public void setStatuses(Set<BookingStatus> statuses) {
+	public void setStatuses(List<BookingStatus> statuses) {
 		this.statuses = statuses;
 	}
 

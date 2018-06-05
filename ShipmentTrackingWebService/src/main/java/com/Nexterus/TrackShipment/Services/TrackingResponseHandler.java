@@ -1,8 +1,8 @@
 package com.Nexterus.TrackShipment.Services;
 
 import java.sql.Timestamp;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -116,7 +116,7 @@ public class TrackingResponseHandler {
 		}
 		booking.setStatusDates(statusDates);
 
-		Set<BookingStatus> statuses = new HashSet<>();
+		List<BookingStatus> statuses = new ArrayList<>();
 		bookingStatus.setStatus(EdiStatus);
 		bookingStatus.setBooking(booking);
 		statuses.add(bookingStatus);

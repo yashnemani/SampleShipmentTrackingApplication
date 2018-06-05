@@ -4,13 +4,13 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,12 +37,13 @@ public class UPS_UpdateActivity {
 	public void updateActivity(Object obj, int id, int provider) {
 
 		String EdiStatus = null;
+		String NxtStatus = null;
 		Gson gson = new Gson();
 		String json = gson.toJson(obj);
 		JSONObject jobj;
 		Booking booking = bookRepo.getOne(id);
 		BookingStatus bookingStatus = new BookingStatus();
-		Set<BookingStatus> statuses = new HashSet<>();
+		List<BookingStatus> statuses = new ArrayList<>();
 
 		BookingCurrentStatus currentStatus = new BookingCurrentStatus();
 		if (booking.getCurrentStatus() != null)
@@ -62,8 +63,10 @@ public class UPS_UpdateActivity {
 					String error = jobj.getJSONObject("Fault").getJSONObject("detail").getJSONObject("Errors")
 							.getJSONObject("ErrorDetail").getJSONObject("PrimaryErrorCode").getString("Description");
 					System.err.println(error);
+					Logger.error("UPS Tracking Exceotion for " + id + " Error:" + error);
 				} catch (JSONException e) {
-					System.out.println(e.getCause() + " " + e.getMessage());
+					System.out.println(e + " " + e.getCause().getMessage());
+					Logger.error("JSON Exception " + e.getMessage());
 				}
 				return;
 			} else {
@@ -83,7 +86,8 @@ public class UPS_UpdateActivity {
 						estDlvr = parseDateTime(dt, time);
 					}
 				} catch (JSONException e) {
-					System.out.println(e.getCause() + " " + e.getMessage());
+					System.out.println(e);
+					Logger.error("JSON Exception " + e.getMessage());
 					try {
 						js = jsObj.getJSONObject("DeliveryDetail");
 						if (js.getJSONObject("Type").getString("Description").equals("Estimated Delivery")) {
@@ -92,7 +96,8 @@ public class UPS_UpdateActivity {
 							estDlvr = parseDateTime(dt, time);
 						}
 					} catch (JSONException e1) {
-						System.out.println(e1.getCause() + " " + e1.getMessage());
+						System.out.println(e1);
+						Logger.error("JSON Exception " + e1.getMessage());
 					}
 				}
 
@@ -100,7 +105,8 @@ public class UPS_UpdateActivity {
 				try {
 					jArr = jsObj.getJSONArray("Activity");
 				} catch (JSONException e) {
-					System.out.println(e.getCause() + " " + e.getMessage());
+					System.out.println(e);
+					Logger.error("JSON Exception " + e.getMessage());
 				}
 
 				for (int i = jArr.length() - 1; i >= 0; i--) {
@@ -124,6 +130,10 @@ public class UPS_UpdateActivity {
 							.filter(a -> a.getStatus().equals(tempStatus) & a.getLocation().equals(tempLocation))
 							.findFirst().isPresent())
 						continue;
+					else if (statuses.stream().filter(a -> a.getLocation() != null)
+							.filter(a -> a.getStatus().equals(tempStatus) & a.getLocation().equals(tempLocation))
+							.findFirst().isPresent())
+						continue;
 					else
 						statuses.add(bookingStatus);
 
@@ -133,19 +143,16 @@ public class UPS_UpdateActivity {
 					if (EdiStatus.equals("D1"))
 						statusDates.setDt_delivered(bookingStatus.getDate());
 
-					if (i == 0) {
-						String NxtStatus = null;
-						NxtStatus = bookStatusRepo.findNxtStatus(EdiStatus);
-						currentStatus.setBooking(booking);
-						currentStatus.setLocation(bookingStatus.getLocation());
-						currentStatus.setMessage(bookingStatus.getMessage());
-						currentStatus.setStatus(bookingStatus);
-						currentStatus.setShipStatus(EdiStatus);
-						currentStatus.setShipState(NxtStatus);
-						currentStatus.setDate(bookingStatus.getDate());
-						if (estDlvr != null)
-							currentStatus.setEstDeliveryDt(estDlvr);
-					}
+					NxtStatus = bookStatusRepo.findNxtStatus(EdiStatus);
+					currentStatus.setBooking(booking);
+					currentStatus.setLocation(bookingStatus.getLocation());
+					currentStatus.setMessage(bookingStatus.getMessage());
+					currentStatus.setStatus(bookingStatus);
+					currentStatus.setShipStatus(EdiStatus);
+					currentStatus.setShipState(NxtStatus);
+					currentStatus.setDate(bookingStatus.getDate());
+					if (estDlvr != null)
+						currentStatus.setEstDeliveryDt(estDlvr);
 				}
 			}
 			if (statusDates != null)
@@ -162,7 +169,8 @@ public class UPS_UpdateActivity {
 				bookRepo.save(booking);
 				bookRepo.refresh(booking);
 			} catch (Exception ex) {
-				System.err.println(ex.getCause().getMessage());
+				System.err.println(ex.getMessage());
+				Logger.error("RunTime Exception " + ex.getMessage());
 			}
 
 			if (EdiStatus != null) {
@@ -172,7 +180,8 @@ public class UPS_UpdateActivity {
 				}
 			}
 		} catch (JSONException e) {
-			System.out.println(e.getCause() + " " + e.getMessage());
+			System.out.println(e );
+			Logger.error("JSON Exception " + e.getMessage());
 			return;
 		}
 	}
@@ -205,20 +214,17 @@ public class UPS_UpdateActivity {
 				} else {
 					status = "ADT";
 					message = "Arrived at Destination Terminal " + city + "," + state;
-					}
+				}
 			} else if (message.contains("Departure")) {
 				status = "P1";
-				message = "Departed Terminal Location " + city + ","+ state;
-				}
-			else if (message.equals("Shipment has arrived at a Service Center")) {
+				message = "Departed Terminal Location " + city + "," + state;
+			} else if (message.equals("Shipment has arrived at a Service Center")) {
 				status = "X4";
 				message = "Arrived at Interim Terminal " + city + "," + state;
-			}
-			else if (message.contains("delivery appointment")) {
+			} else if (message.contains("delivery appointment")) {
 				status = "X9";
 				message = "Delivery Appointment setup";
-				}
-			else if (message.equals("Out for Delivery"))
+			} else if (message.equals("Out for Delivery"))
 				status = "OFD";
 			else if (message.contains("delivered"))
 				status = "D1";
@@ -228,8 +234,11 @@ public class UPS_UpdateActivity {
 				status = "PRTR";
 			else if (message.contains("delayed") || message.contains("delay"))
 				status = "SD";
-			else if (message.contains("cannot be found"))
+			else if (message.contains("cannot be found")
+					|| message.contains("attempting to obtain appointment information"))
 				status = "UA";
+			else if (message.contains("Delivery Confirmation pending from the consignee"))
+				status = "CD";
 			else
 				System.out.println("Unhandled Message " + message);
 
@@ -240,7 +249,7 @@ public class UPS_UpdateActivity {
 			return bookingStatus;
 
 		} catch (JSONException e) {
-			System.out.println(e.getCause() + " " + e.getMessage());
+			System.out.println(e);
 			return null;
 		}
 	}
