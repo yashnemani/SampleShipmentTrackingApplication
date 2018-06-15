@@ -70,7 +70,7 @@ public class BanyanStatusHandlerService {
 			List<BigDecimal> bookingIds = new ArrayList<>();
 			bookingIds = bookStatusRepo.findBookingByReference(3, loadId.toString());
 			if (bookingIds.isEmpty()) {
-				System.out.println("No Booking found with the following Load ID"+loadId+" as Reference");
+				System.out.println("No Booking found with the following Load ID" + loadId + " as Reference");
 				return;
 			}
 			System.out.println(bookingIds.get(0));
@@ -86,7 +86,7 @@ public class BanyanStatusHandlerService {
 				bookref.setRef_type(0);
 				bookref.setReference(proNum);
 				references.add(bookref);
-			} else if (!reff1.get().getReference().equals(proNum)) {
+			} else if (reff1.get().getReference() == null || !reff1.get().getReference().equals(proNum)) {
 				BookingReferences bookref = reff1.get();
 				bookref.setReference(reff1.get().getReference());
 				references.add(bookref);
@@ -99,7 +99,7 @@ public class BanyanStatusHandlerService {
 				bookref.setRef_type(1);
 				bookref.setReference(bolNum);
 				references.add(bookref);
-			} else if (!reff2.get().getReference().equals(proNum)) {
+			} else if (reff2.get().getReference() == null || !reff2.get().getReference().equals(bolNum)) {
 				BookingReferences bookref = reff2.get();
 				bookref.setReference(reff2.get().getReference());
 				references.add(bookref);

@@ -65,7 +65,7 @@ public class UPS_UpdateActivity {
 					System.err.println(error);
 					Logger.error("UPS Tracking Exceotion for " + id + " Error:" + error);
 				} catch (JSONException e) {
-					System.out.println(e + " " + e.getCause().getMessage());
+					System.out.println(e.getMessage());
 					Logger.error("JSON Exception " + e.getMessage());
 				}
 				return;
@@ -86,7 +86,7 @@ public class UPS_UpdateActivity {
 						estDlvr = parseDateTime(dt, time);
 					}
 				} catch (JSONException e) {
-					System.out.println(e);
+					System.out.println(e.getMessage());
 					Logger.error("JSON Exception " + e.getMessage());
 					try {
 						js = jsObj.getJSONObject("DeliveryDetail");
@@ -105,7 +105,7 @@ public class UPS_UpdateActivity {
 				try {
 					jArr = jsObj.getJSONArray("Activity");
 				} catch (JSONException e) {
-					System.out.println(e);
+					System.out.println(e.getMessage());
 					Logger.error("JSON Exception " + e.getMessage());
 				}
 
@@ -180,7 +180,7 @@ public class UPS_UpdateActivity {
 				}
 			}
 		} catch (JSONException e) {
-			System.out.println(e );
+			System.out.println(e.getMessage());
 			Logger.error("JSON Exception " + e.getMessage());
 			return;
 		}
@@ -239,8 +239,15 @@ public class UPS_UpdateActivity {
 				status = "UA";
 			else if (message.contains("Delivery Confirmation pending from the consignee"))
 				status = "CD";
-			else
+			else if (message.contains("clearing agency")) {
+				if (message.contains("Released by"))
+					status = "CUSTC ";
+				else
+					status = "CDL";
+			} else {
 				System.out.println("Unhandled Message " + message);
+				Logger.warn("Unhandled Message " + message);
+			}
 
 			bookingStatus.setDate(timestamp);
 			bookingStatus.setLocation(city + "," + state);
@@ -249,7 +256,7 @@ public class UPS_UpdateActivity {
 			return bookingStatus;
 
 		} catch (JSONException e) {
-			System.out.println(e);
+			System.out.println(e.getMessage());
 			return null;
 		}
 	}

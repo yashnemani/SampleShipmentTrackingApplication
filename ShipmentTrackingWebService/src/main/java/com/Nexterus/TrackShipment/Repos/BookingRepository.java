@@ -14,6 +14,6 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>, Book
 	@Query(nativeQuery=true, value="select booking_id from tracking_queue where provider_id=:provider order by booking_id")
 	List<BigDecimal> getTrackIdsFromQueue(@Param("provider")int providerId);
 	
-	@Query(nativeQuery = true, value = "select cs.bookingid from booking_currentstatus cs join booking b on b.booking_id=cs.bookingid where cs.shipment_state='DL' and b.provider_id=:provider order by cs.bookingid desc")
-	List<BigDecimal> findDeliveredBookingsByProvider(@Param("provider") int provider);
+	@Query(nativeQuery=true, value="select id from banyan_track_response order by id desc OFFSET 0 ROWS FETCH NEXT 20 ROWS ONLY")
+	List<BigDecimal> getBlobIds();
 }

@@ -152,39 +152,41 @@ public class XPO_UpdateEvents {
 
 			if (message.equals("Arrived at Customer"))
 				status = "X3";
-			if (message.equals("Reported picked up")) {
+			else if (message.equals("Reported picked up")) {
 				status = "SPU";
-			}
-			if (message.equals("Loaded on trailer")) {
-				if (i < 3) {
-					status = "CP";
-					message = "Completed Loading at Pickup Location";
-				}
-			}
-			if (message.equals("City arrived")) {
+			} /*
+				 * else if (message.equals("Loaded on trailer")) { if (i < 3) { status = "CP";
+				 * message = "Completed Loading at Pickup Location"; } }
+				 */else if (message.equals("City arrived")) {
 				status = "AOT";
 				message = "Arrived at Origin Terminal " + location;
-			}
-			if (message.equals("Schedule dispatched")) {
+			} else if (message.equals("Schedule dispatched")) {
 				status = "P1";
 				message = "Departed Terminal location " + location;
-			}
-			if (message.equals("Schedule arrived")) {
+			} else if (message.equals("Schedule arrived")) {
 				status = "X4";
 				message = "Arrived at Terminal location " + location;
-			}
-			if (message.equals("Closed for delivery")) {
+			} else if (message.equals("Closed for delivery")) {
 				status = "ADT";
 				message = "Arrived at Delivery Terminal location " + location;
-			}
-			if (message.contains("Out for delivery"))
+			} else if (message.contains("Out for delivery"))
 				status = "OFD";
-			if (message.equals("Arrived at Customer"))
+			else if (message.equals("Arrived at Customer"))
 				status = "X1";
-			if (message.contains("delivered")) {
-				status = "D1";
-				message = "Delivered to Consignee " + location;
-			}
+			else if (message.contains("delivered") || message.contains("Delivered")) {
+				if (message.contains("short") || message.contains("shorted"))
+					status = "D1SS";
+				else if (message.contains("agent"))
+					status = "J1";
+				else
+					status = "D1";
+				message = message +" "+ location;
+			} else if (message.contains("short") || message.contains("shorted"))
+				status = "SS";
+			else if (message.contains("Refused"))
+				status = "A7";
+			else
+				Logger.warn("Unhandled Message " + message);
 
 			BookingStatus bookingStatus = new BookingStatus();
 			bookingStatus.setDate(timestamp);

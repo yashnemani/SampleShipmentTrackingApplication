@@ -1,6 +1,9 @@
 package com.Nexterus.TrackShipment.Controllers;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.json.JSONObject;
 import org.pmw.tinylog.Logger;
@@ -33,7 +36,6 @@ import com.Nexterus.TrackShipment.Services.BanyanStatusHandlerService;
 import com.Nexterus.TrackShipment.Services.BanyanTrackResponseHandler;
 import com.Nexterus.TrackShipment.Services.GetCurrentStatus;
 import com.Nexterus.TrackShipment.Services.GetRefNum;
-import com.Nexterus.TrackShipment.Services.SampleBanyanTrackResponse;
 import com.Nexterus.TrackShipment.Services.TrackingResponseHandler;
 import com.Nexterus.TrackShipment.Services.UPS_UpdateActivity;
 import com.Nexterus.TrackShipment.Services.XPO_UpdateEvents;
@@ -61,8 +63,6 @@ public class TrackingController {
 	GetCurrentStatus currentStatusService;
 	@Autowired
 	BanyanTrackResponseHandler banyanTrackResponseHandler;
-	@Autowired
-	SampleBanyanTrackResponse sampleService;
 	@Autowired
 	BanyanStatusHandlerService statusHandlerService;
 	@Autowired
@@ -173,8 +173,8 @@ public class TrackingController {
 			}
 			System.out.println(e.getResponseBodyAsString());
 			System.out.println(e.getResponseHeaders());
-			if(e.getMessage()!=null)
-			Logger.info("XPO Tracking Request failed for " + ref + " Error " + e.getMessage());
+			if (e.getMessage() != null)
+				Logger.info("XPO Tracking Request failed for " + ref + " Error " + e.getMessage());
 			return e.getResponseBodyAsString();
 		}
 	}
@@ -225,19 +225,6 @@ public class TrackingController {
 		}
 	}
 
-	// Get the Current Status details for a given Booking ID
-	@GetMapping("/getCurrentStatus/{bookingID}")
-	public Object getCurrentStatus(@PathVariable int bookingID) {
-
-		JSONObject json = new JSONObject();
-		json = currentStatusService.getBookingCurrentStatus(bookingID);
-		if (json == null)
-			return "Booking does not exist in DB or does not have a current status for ID " + bookingID;
-		Gson gson = new Gson();
-		Object obj = gson.fromJson(json.toString(), Object.class);
-		return obj;
-	}
-
 	@GetMapping("/getSavedTrackResponse/{id}")
 	public TrackingStatusResponse getTrackResponseBlob(@PathVariable int id) {
 
@@ -248,11 +235,13 @@ public class TrackingController {
 
 	@GetMapping("/testSampleBanyanResponse/{id}")
 	public void testSampleBanyanResponse(@PathVariable int id) {
-
 		if (id != 0)
 			banyanTrackResponseHandler.handleTrackResponse(banyanTrackResponseHandler.getBanyanResponse(id));
-		else
-			banyanTrackResponseHandler.handleTrackResponse(sampleService.getSampleBanyanTrackresponse());
+	}
+
+	@GetMapping("/getUnknownStatuses")
+	public Object getUnknownStatuses() {
+		return banyanTrackResponseHandler.findBanyanUnknownStatuses();
 	}
 
 	@GetMapping("/getUpsRequest/{id}")
