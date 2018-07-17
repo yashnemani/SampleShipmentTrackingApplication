@@ -1,4 +1,4 @@
-package com.Nexterus.TrackShipment.Services;
+package com.Nexterus.TrackShipment.Services.General;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -17,6 +17,9 @@ import com.Nexterus.TrackShipment.Entities.BookingStatus;
 import com.Nexterus.TrackShipment.Entities.NxtStatusDates;
 import com.Nexterus.TrackShipment.Repos.BookingRepository;
 import com.Nexterus.TrackShipment.Repos.BookingStatusRepository;
+import com.Nexterus.TrackShipment.Services.Banyan.BanyanTrackResponseHandler;
+import com.Nexterus.TrackShipment.Services.UPS.UpsTrackResponseHandler;
+import com.Nexterus.TrackShipment.Services.XPO.XpoTrackResponseHandler;
 import com.google.gson.Gson;
 
 @Service

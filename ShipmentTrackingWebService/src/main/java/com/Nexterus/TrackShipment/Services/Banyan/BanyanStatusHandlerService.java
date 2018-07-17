@@ -1,4 +1,4 @@
-package com.Nexterus.TrackShipment.Services;
+package com.Nexterus.TrackShipment.Services.Banyan;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +37,8 @@ public class BanyanStatusHandlerService {
 	BookingStatusRepository bookStatusRepo;
 	@Autowired
 	BookingRepository bookRepo;
+	@Autowired
+	BuildTrackingStatusJson buildService;
 
 	@Transactional
 	public void handleLoadStatus(BanyanStatus banStatus) {
@@ -71,6 +74,7 @@ public class BanyanStatusHandlerService {
 			bookingIds = bookStatusRepo.findBookingByReference(3, loadId.toString());
 			if (bookingIds.isEmpty()) {
 				System.out.println("No Booking found with the following Load ID" + loadId + " as Reference");
+				Logger.warn("No Booking found with the following Load ID" + loadId + " as Reference");
 				return;
 			}
 			System.out.println(bookingIds.get(0));
@@ -88,7 +92,7 @@ public class BanyanStatusHandlerService {
 				references.add(bookref);
 			} else if (reff1.get().getReference() == null || !reff1.get().getReference().equals(proNum)) {
 				BookingReferences bookref = reff1.get();
-				bookref.setReference(reff1.get().getReference());
+				bookref.setReference(proNum);
 				references.add(bookref);
 			}
 
@@ -101,16 +105,19 @@ public class BanyanStatusHandlerService {
 				references.add(bookref);
 			} else if (reff2.get().getReference() == null || !reff2.get().getReference().equals(bolNum)) {
 				BookingReferences bookref = reff2.get();
-				bookref.setReference(reff2.get().getReference());
+				bookref.setReference(bolNum);
 				references.add(bookref);
 			}
 			booking.setReferences(references);
 
 			String EdiStatus = status;
 			String NxtStatus = bookStatusRepo.findNxtStatus(EdiStatus);
+			String scac = null;
 			if (NxtStatus == null) {
 				System.err
 						.println("EDI Status " + EdiStatus + " does not exist in DB or does not have a valid mapping!");
+				/* scac = bookRepo.getSCAC(bookingID); */
+				Logger.warn("EDI Status " + EdiStatus + " Missing! RateQuote: " + bookingID + " and SCAC: " + scac);
 				return;
 			}
 
@@ -144,7 +151,8 @@ public class BanyanStatusHandlerService {
 
 			List<BookingStatus> statuses = new ArrayList<>();
 			BookingStatus bookingStatus = new BookingStatus();
-			bookingStatus.setLocation(location);
+			bookingStatus.setLocation(city);
+			bookingStatus.setState(state);
 			bookingStatus.setMessage(message);
 			bookingStatus.setDate(dateTime);
 			bookingStatus.setStatus(EdiStatus);
@@ -176,10 +184,24 @@ public class BanyanStatusHandlerService {
 			if (EdiStatus.equals("D1"))
 				bookRepo.deleteFromTrackingQueue(bookingID);
 
-			bookRepo.save(booking);
-			bookRepo.refresh(booking);
+			try {
+				bookRepo.save(booking);
+			} catch (Exception e) {
+				System.err.println("Exception " + e.getMessage() + " " + e.getStackTrace());
+				Logger.error("Exception " + e.getMessage() + " " + e.getStackTrace());
+			}
+			try {
+				if (!statuses.isEmpty()) {
+					scac = bookRepo.getSCAC(bookingID);
+					buildService.updateTrackingStatuses(scac, bookingID.toString(), proNum, statuses);
+				}
+			} catch (Exception e) {
+				System.out.println("Exception " + e.getMessage() + " " + e.getStackTrace());
+				Logger.error("Exception " + e.getMessage() + " " + e.getStackTrace());
+			}
+
 		} catch (JSONException e) {
-			System.out.println(e.getCause() + " " + e.getMessage());
+			System.err.println(e.getCause() + " " + e.getMessage());
 			return;
 		}
 	}

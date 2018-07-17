@@ -1,4 +1,4 @@
-package com.Nexterus.TrackShipment.Services;
+package com.Nexterus.TrackShipment.Services.UPS;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -21,6 +21,8 @@ import com.Nexterus.TrackShipment.Entities.BookingStatus;
 import com.Nexterus.TrackShipment.Entities.NxtStatusDates;
 import com.Nexterus.TrackShipment.Repos.BookingRepository;
 import com.Nexterus.TrackShipment.Repos.BookingStatusRepository;
+import com.Nexterus.TrackShipment.Services.Banyan.BuildTrackingStatusJson;
+import com.Nexterus.TrackShipment.Services.General.TrackSchedulerService;
 import com.google.gson.Gson;
 
 @Service
@@ -32,9 +34,11 @@ public class UPS_UpdateActivity {
 	BookingRepository bookRepo;
 	@Autowired
 	TrackSchedulerService trackSchedulerService;
+	@Autowired
+	BuildTrackingStatusJson buildService;
 
 	@Transactional
-	public void updateActivity(Object obj, int id, int provider) {
+	public void updateActivity(Object obj, Integer id, int provider, String pro) {
 
 		String EdiStatus = null;
 		String NxtStatus = null;
@@ -172,6 +176,13 @@ public class UPS_UpdateActivity {
 				System.err.println(ex.getMessage());
 				Logger.error("RunTime Exception " + ex.getMessage());
 			}
+			try {
+				if(!statuses.isEmpty())
+				buildService.updateTrackingStatuses("UPGF", id.toString(), pro, statuses);
+			} catch (Exception ex) {
+				System.err.println("Utl_Status Exception"+ex.getMessage());
+				Logger.error("Utl_Status Exception " + ex.getMessage());
+			}
 
 			if (EdiStatus != null) {
 				if (EdiStatus.equals("D1") || EdiStatus.equals("CA")) {
@@ -250,7 +261,8 @@ public class UPS_UpdateActivity {
 			}
 
 			bookingStatus.setDate(timestamp);
-			bookingStatus.setLocation(city + "," + state);
+			bookingStatus.setLocation(city);
+			bookingStatus.setState(state);
 			bookingStatus.setMessage(message);
 			bookingStatus.setStatus(status);
 			return bookingStatus;

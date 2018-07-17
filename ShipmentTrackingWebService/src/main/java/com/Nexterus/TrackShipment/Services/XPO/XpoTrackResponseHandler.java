@@ -1,4 +1,4 @@
-package com.Nexterus.TrackShipment.Services;
+package com.Nexterus.TrackShipment.Services.XPO;
 
 import java.sql.Timestamp;
 

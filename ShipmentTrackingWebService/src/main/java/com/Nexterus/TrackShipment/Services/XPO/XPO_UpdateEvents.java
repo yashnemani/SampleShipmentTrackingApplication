@@ -1,4 +1,4 @@
-package com.Nexterus.TrackShipment.Services;
+package com.Nexterus.TrackShipment.Services.XPO;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -18,6 +18,8 @@ import com.Nexterus.TrackShipment.Entities.BookingStatus;
 import com.Nexterus.TrackShipment.Entities.NxtStatusDates;
 import com.Nexterus.TrackShipment.Repos.BookingRepository;
 import com.Nexterus.TrackShipment.Repos.BookingStatusRepository;
+import com.Nexterus.TrackShipment.Services.Banyan.BuildTrackingStatusJson;
+import com.Nexterus.TrackShipment.Services.General.TrackSchedulerService;
 import com.google.gson.Gson;
 
 @Service
@@ -29,9 +31,11 @@ public class XPO_UpdateEvents {
 	BookingRepository bookRepo;
 	@Autowired
 	TrackSchedulerService trackSchedulerService;
+	@Autowired
+	BuildTrackingStatusJson buildService;
 
 	@Transactional
-	public void updateEvents(Object obj, int id, int provider) {
+	public void updateEvents(Object obj, Integer id, int provider, String pro) {
 
 		String EdiStatus = null;
 		String NxtStatus = null;
@@ -47,10 +51,14 @@ public class XPO_UpdateEvents {
 			currentStatus = booking.getCurrentStatus();
 
 		NxtStatusDates statusDates = new NxtStatusDates();
-		if (booking.getStatusDates() != null)
-			statusDates = booking.getStatusDates();
-		else
+		if (booking.getStatusDates() != null) {
+			if (booking.getStatusDates().getBooking() != null)
+				statusDates = booking.getStatusDates();
+			else
+				statusDates.setBooking(booking);
+		} else {
 			statusDates.setBooking(booking);
+		}
 
 		try {
 			jobj = new JSONObject(json);
@@ -117,6 +125,14 @@ public class XPO_UpdateEvents {
 				System.err.println(ex.getMessage());
 				Logger.error("RunTime Exception " + ex.getMessage());
 			}
+			try {
+				if (!statuses.isEmpty()) {
+					buildService.updateTrackingStatuses("CNWY", id.toString(), pro, statuses);
+				}
+			} catch (Exception ex) {
+				System.err.println("Utl_Status Exception " + ex.getMessage());
+				Logger.error("Utl_Status Exception " + ex.getMessage());
+			}
 
 			if (EdiStatus != null) {
 				if (EdiStatus.equals("D1") || EdiStatus.equals("CA")) {
@@ -180,7 +196,7 @@ public class XPO_UpdateEvents {
 					status = "J1";
 				else
 					status = "D1";
-				message = message +" "+ location;
+				message = message + " " + location;
 			} else if (message.contains("short") || message.contains("shorted"))
 				status = "SS";
 			else if (message.contains("Refused"))
@@ -190,7 +206,8 @@ public class XPO_UpdateEvents {
 
 			BookingStatus bookingStatus = new BookingStatus();
 			bookingStatus.setDate(timestamp);
-			bookingStatus.setLocation(location);
+			bookingStatus.setLocation(city);
+			bookingStatus.setState(state);
 			bookingStatus.setMessage(message);
 			bookingStatus.setStatus(status);
 			return bookingStatus;

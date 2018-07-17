@@ -1,4 +1,4 @@
-package com.Nexterus.TrackShipment.Services;
+package com.Nexterus.TrackShipment.Services.General;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -20,13 +20,13 @@ public class TrackSchedulerService {
 	@Autowired
 	BookingRepository bookRepo;
 
-	Integer XPO_Batch = 0;
-	Integer UPS_Batch = 0;
-	Integer xpoDlvrCount = 0;
-	Integer upsDlvrCount = 0;
+	Integer XPO_Batch = 15;
+	Integer UPS_Batch = 10;
+	Integer xpoDlvrCount = 1;
+	Integer upsDlvrCount = 1;
 
-	@Scheduled(cron = "0 40 * * * ?")
-	public void banyanTrackingScheduler() {
+	@Scheduled(cron = "0 21 * * * ?")
+	public void banyanProductionTrackingScheduler() {
 		trackController.getBanyanStatuses();
 	}
 
@@ -60,7 +60,7 @@ public class TrackSchedulerService {
 		Logger.info("Processing a new XPO Batch from TrackingQueue... Batch:" + XPO_Batch);
 		for (int i = min; i < max; i++) {
 			System.out.println("Tracking ID: " + trackIds.get(i));
-			trackController.getXPOStatus(trackIds.get(i).toString(), 0, true);
+			trackController.getXPOStatus(trackIds.get(i).toString());
 		}
 		if (XPO_Batch < batchSize)
 			XPO_Batch++;
@@ -98,7 +98,7 @@ public class TrackSchedulerService {
 		Logger.info("Processing a new UPS Batch from TrackingQueue... Batch:" + UPS_Batch);
 		for (int i = min; i < max; i++) {
 			System.out.println("Tracking ID: " + trackIds.get(i));
-			trackController.getUPSstatus(trackIds.get(i).toString(), 0, true);
+			trackController.getUPSstatus(trackIds.get(i).toString());
 		}
 		if (UPS_Batch < batchSize)
 			UPS_Batch++;

@@ -1,4 +1,4 @@
-package com.Nexterus.TrackShipment.Services;
+package com.Nexterus.TrackShipment.Services.Banyan;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -6,12 +6,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -63,7 +60,7 @@ public class BanyanTrackResponseHandler {
 		for (int i = trackResponse.getTrackingStatuses().size() - 1; i >= 0; i--) {
 			banStatus = banyanStatuses.get(i);
 			System.out.println(i + " " + banStatus.getCode());
-			statusHandlerService.handleLoadStatus(banStatus);
+				statusHandlerService.handleLoadStatus(banStatus);
 		}
 	}
 
@@ -112,35 +109,5 @@ public class BanyanTrackResponseHandler {
 				e.printStackTrace();
 			}
 		}
-	}
-
-	public List<BanyanStatus> findBanyanUnknownStatuses() {
-
-		List<BigDecimal> blobIds = new ArrayList<>();
-		Set<String> unknownStatuses = new HashSet<>();
-		List<BanyanStatus> unknownLoads = new ArrayList<>();
-		blobIds = bookRepo.getBlobIds();
-		
-		for (int i = 0; i < blobIds.size(); i++) {
-			TrackingStatusResponse track = new TrackingStatusResponse();
-			track = trackController.getTrackResponseBlob(blobIds.get(i).intValue());
-			List<BanyanStatus> banyanStatuses = new ArrayList<>();
-			BanyanStatus banStatus = new BanyanStatus();
-			banyanStatuses = track.getTrackingStatuses();
-			
-			for (int j = banyanStatuses.size() - 1; j >= 0; j--) {
-				banStatus = banyanStatuses.get(j);
-				String code = banStatus.getCode();
-				String NxtStatus = bookStatusRepo.findNxtStatus(code);
-				if (NxtStatus == null) {
-					System.err.println("EDI Status " + code + " does not exist");
-					if (!unknownStatuses.contains(code))
-						unknownLoads.add(banStatus);
-					unknownStatuses.add(code);
-				}
-			}
-		}
-
-		return unknownLoads;
 	}
 }

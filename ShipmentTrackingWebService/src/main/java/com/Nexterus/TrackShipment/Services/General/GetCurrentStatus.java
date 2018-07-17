@@ -1,4 +1,4 @@
-package com.Nexterus.TrackShipment.Services;
+package com.Nexterus.TrackShipment.Services.General;
 
 import org.json.JSONException;
 import org.json.JSONObject;

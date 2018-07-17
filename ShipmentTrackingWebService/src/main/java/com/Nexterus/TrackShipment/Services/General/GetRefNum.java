@@ -1,4 +1,4 @@
-package com.Nexterus.TrackShipment.Services;
+package com.Nexterus.TrackShipment.Services.General;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -46,32 +46,15 @@ public class GetRefNum {
 		if (!reff.isPresent()) {
 			System.out.println("Booking does not have reference of required type! ProNumber");
 
-			if (provider == 1) {
-				reff = refStreamSupplier.get().filter(a -> a.getRef_type() == 1).findAny();
-				refType = 1;
-				if (!reff.isPresent()) {
-					System.out.println("Booking does not have reference of required type! BOLNumber/ProNumber");
-					reff = refStreamSupplier.get().filter(a -> a.getRef_type() == 2).findAny();
-					refType = 2;
-					if (!reff.isPresent()) {
-						System.out.println("Booking does not have reference of required type! PO_Number/ProNumber");
-						return "Booking does not have reference of required type! BOLNumber/ProNumber";
-					}
-				}
-			}
-
-			if (provider == 2) {
-				reff = refStreamSupplier.get().filter(a -> a.getRef_type() == 1).findAny();
-				refType = 1;
+			reff = refStreamSupplier.get().filter(a -> a.getRef_type() == 1).findAny();
+			refType = 1;
+			if (!reff.isPresent()) {
+				System.out.println("Booking does not have reference of required type! BOLNumber/ProNumber");
+				reff = refStreamSupplier.get().filter(a -> a.getRef_type() == 2).findAny();
+				refType = 2;
 				if (!reff.isPresent()) {
 					System.out.println("Booking does not have reference of required type! PO_Number/ProNumber");
-					reff = refStreamSupplier.get().filter(a -> a.getRef_type() == 2).findAny();
-					refType = 2;
-					if (!reff.isPresent()) {
-						System.out.println(
-								"Booking does not have reference of required type! BOLNumber/PO_Number/ProNumber");
-						return "Booking does not have reference of required type! BOLNumber/ProNumber";
-					}
+					return "Booking does not have reference of required type! BOLNumber/ProNumber";
 				}
 			}
 		}
@@ -98,32 +81,16 @@ public class GetRefNum {
 		if (!reff.isPresent()) {
 			System.out.println("Booking does not have reference of required type! ProNumber");
 
-			if (provider == 1) {
-				reff = refStreamSupplier.get().filter(a -> a.getRef_type() == 1).findAny();
-				refType = 1;
+			reff = refStreamSupplier.get().filter(a -> a.getRef_type() == 1).findAny();
+			refType = 1;
+			if (!reff.isPresent()) {
+				System.out.println("Booking does not have reference of required type! PO_Number/ProNumber");
+				reff = refStreamSupplier.get().filter(a -> a.getRef_type() == 2).findAny();
+				refType = 2;
 				if (!reff.isPresent()) {
-					System.out.println("Booking does not have reference of required type! BOLNumber/ProNumber");
-					reff = refStreamSupplier.get().filter(a -> a.getRef_type() == 2).findAny();
-					refType = 2;
-					if (!reff.isPresent()) {
-						System.out.println("Booking does not have reference of required type! PO_Number/ProNumber");
-						return null;
-					}
-				}
-			}
-
-			if (provider == 2) {
-				reff = refStreamSupplier.get().filter(a -> a.getRef_type() == 1).findAny();
-				refType = 1;
-				if (!reff.isPresent()) {
-					System.out.println("Booking does not have reference of required type! PO_Number/ProNumber");
-					reff = refStreamSupplier.get().filter(a -> a.getRef_type() == 2).findAny();
-					refType = 2;
-					if (!reff.isPresent()) {
-						System.out.println(
-								"Booking does not have reference of required type! BOLNumber/PO_Number/ProNumber");
-						return null;
-					}
+					System.out
+							.println("Booking does not have reference of required type! BOLNumber/PO_Number/ProNumber");
+					return null;
 				}
 			}
 		}

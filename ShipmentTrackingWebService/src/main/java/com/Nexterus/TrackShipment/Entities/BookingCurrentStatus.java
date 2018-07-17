@@ -44,6 +44,17 @@ public class BookingCurrentStatus {
 
 	@Column(name = "Location")
 	private String location;
+	
+	@Column(name="state")
+	private String state;
+	
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
+	}
 
 	@Column(name = "EST_DLVR_DT")
 	private Timestamp estDeliveryDt;

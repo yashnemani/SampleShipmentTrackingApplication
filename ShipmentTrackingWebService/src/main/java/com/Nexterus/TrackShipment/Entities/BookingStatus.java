@@ -40,6 +40,9 @@ public class BookingStatus {
 	@Column(name = "Location")
 	private String location;
 
+	@Column(name="state")
+	private String state;
+
 	@OneToOne(fetch = FetchType.LAZY, mappedBy = "status", cascade = CascadeType.ALL)
 	private BookingCurrentStatus currentStatus;
 
@@ -98,5 +101,11 @@ public class BookingStatus {
 	public void setCurrentStatus(BookingCurrentStatus currentStatus) {
 		this.currentStatus = currentStatus;
 	}
+	public String getState() {
+		return state;
+	}
 
+	public void setState(String state) {
+		this.state = state;
+	}
 }

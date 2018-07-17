@@ -1,4 +1,4 @@
-package com.Nexterus.TrackShipment.Services;
+package com.Nexterus.TrackShipment.Services.UPS;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
