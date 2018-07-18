@@ -20,10 +20,10 @@ public class TrackSchedulerService {
 	@Autowired
 	BookingRepository bookRepo;
 
-	Integer XPO_Batch = 15;
-	Integer UPS_Batch = 10;
-	Integer xpoDlvrCount = 1;
-	Integer upsDlvrCount = 1;
+	Integer XPO_Batch = 16;
+	Integer UPS_Batch = 11;
+	Integer xpoDlvrCount = 2;
+	Integer upsDlvrCount = 2;
 
 	@Scheduled(cron = "0 21 * * * ?")
 	public void banyanProductionTrackingScheduler() {
@@ -104,6 +104,16 @@ public class TrackSchedulerService {
 			UPS_Batch++;
 		else
 			UPS_Batch = 0;
+	}
+	
+	@Scheduled(cron = "0 2 * * * ?")
+	public void project44_TrackingScheduler() {
+		List<BigDecimal> trackIds = new ArrayList<>();
+		trackIds = bookRepo.getTrackIdsFromQueue(3);
+		for (int i = 0; i < trackIds.size(); i++) {
+			System.out.println("Tracking ID: " + trackIds.get(i));
+			trackController.getTruckLoadStatus(trackIds.get(i).intValue());
+		}
 	}
 
 	public void trackDeliveredCount(int provider) {

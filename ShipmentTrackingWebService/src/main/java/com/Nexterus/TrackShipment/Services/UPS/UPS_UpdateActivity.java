@@ -154,6 +154,7 @@ public class UPS_UpdateActivity {
 					currentStatus.setStatus(bookingStatus);
 					currentStatus.setShipStatus(EdiStatus);
 					currentStatus.setShipState(NxtStatus);
+					currentStatus.setState(bookingStatus.getState());
 					currentStatus.setDate(bookingStatus.getDate());
 					if (estDlvr != null)
 						currentStatus.setEstDeliveryDt(estDlvr);

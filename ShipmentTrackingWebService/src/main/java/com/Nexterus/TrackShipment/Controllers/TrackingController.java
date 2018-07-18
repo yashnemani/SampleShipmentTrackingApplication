@@ -26,7 +26,6 @@ import com.Nexterus.TrackShipment.Models.Banyan.TrackingStatusRequest;
 import com.Nexterus.TrackShipment.Models.Banyan.TrackingStatusResponse;
 import com.Nexterus.TrackShipment.Models.Project44.Auth44;
 import com.Nexterus.TrackShipment.Models.Project44.TrackLoadStatusResponse;
-import com.Nexterus.TrackShipment.Models.UPS.ReferenceNumber;
 import com.Nexterus.TrackShipment.Models.UPS.TrackRequest;
 import com.Nexterus.TrackShipment.Models.UPS.UPS_TrackRequest;
 import com.Nexterus.TrackShipment.Models.XPO.OAuth2Token;
@@ -208,6 +207,9 @@ public class TrackingController {
 	// Project44 Get TruckLoad Statuses
 	@GetMapping("/getTruckLoadStatus/{id}")
 	public Object getTruckLoadStatus(@PathVariable Integer id) {
+		System.out.println("Project44 ID being Tracked: "+id);
+		String ref = bookRepo.findLoadIdReference(id);
+		int refId = Integer.parseInt(ref);
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -216,7 +218,7 @@ public class TrackingController {
 		headers.add("Authorization", auth.getBasic());
 		HttpEntity<HttpHeaders> entity = new HttpEntity<>(headers);
 		System.out.println(headers.get("Authorization"));
-		String url = "https://test.p-44.com/api/v3/tl/shipments/" + id + "/statuses";
+		String url = "https://test.p-44.com/api/v3/tl/shipments/" + refId + "/statuses";
 		try {
 			ResponseEntity<TrackLoadStatusResponse> response = restTemplate.exchange(url, HttpMethod.GET, entity,
 					TrackLoadStatusResponse.class);
@@ -225,7 +227,7 @@ public class TrackingController {
 		} catch (HttpClientErrorException e) {
 			System.out.println(e.getStatusCode());
 			System.out.println(e.getResponseBodyAsString());
-			Logger.error("Project44 Get TruckLoad Status Failed! " + id + " Error: " + e.getMessage());
+			Logger.error("Project44 Get TruckLoad Status Failed! " + refId + " Error: " + e.getMessage());
 			return e.getResponseBodyAsString();
 		}
 	}

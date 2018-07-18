@@ -13,8 +13,6 @@ public class StopStatus {
 	private String arrivalCode;
 	private String arrivalDateTime;
 	private String departureDateTime;
-	@Autowired
-	private ArrivalEstimate arrivalEstimate;
 
 	public StopStatus() {
 		super();
@@ -65,14 +63,4 @@ public class StopStatus {
 	public void setDepartureDateTime(String departureDateTime) {
 		this.departureDateTime = departureDateTime;
 	}
-
-	@JsonProperty("arrivalEstimate")
-	public ArrivalEstimate getArrivalEstimate() {
-		return arrivalEstimate;
-	}
-
-	public void setArrivalEstimate(ArrivalEstimate arrivalEstimate) {
-		this.arrivalEstimate = arrivalEstimate;
-	}
-
 }

@@ -19,4 +19,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>, Book
 	
 	@Query(nativeQuery=true, value="select update_old_status from provider_carrier where carrier_code=:scac")
 	String getUpdateStatusFlag(@Param ("scac") String scac);
+	
+	@Query(nativeQuery=true,value="select reference from booking_reference where reference_type=3 and booking_id=:id")
+	String findLoadIdReference(@Param("id") int bookingId);
 }

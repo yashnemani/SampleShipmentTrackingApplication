@@ -106,6 +106,7 @@ public class XPO_UpdateEvents {
 				currentStatus.setStatus(bookingStatus);
 				currentStatus.setShipStatus(EdiStatus);
 				currentStatus.setShipState(NxtStatus);
+				currentStatus.setState(bookingStatus.getState());
 				currentStatus.setDate(bookingStatus.getDate());
 			}
 			if (statusDates != null)
