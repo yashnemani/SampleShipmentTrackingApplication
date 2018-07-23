@@ -42,15 +42,15 @@ public class BanyanTrackResponseHandler {
 	public void handleTrackResponse(TrackingStatusResponse trackResponse) {
 
 		if (!trackResponse.isSuccess()) {
-			nxtLogger.error("Error: " + trackResponse.getError());
+			log.error("Error: " + trackResponse.getError());
 			return;
 		}
 
 		if (trackResponse.getTrackingStatuses() == null) {
-			nxtLogger.error("Banyan has returned no Tracking Statuses!");
+			log.error("Banyan has returned no Tracking Statuses!");
 			return;
 		} else if (trackResponse.getTrackingStatuses().size() == 0) {
-			nxtLogger.error("Banyan has returned no Tracking Statuses!");
+			log.error("Banyan has returned no Tracking Statuses!");
 			return;
 		}
 		// Save Banyan Track Response

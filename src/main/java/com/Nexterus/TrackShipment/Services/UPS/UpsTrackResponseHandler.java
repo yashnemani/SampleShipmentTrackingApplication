@@ -37,7 +37,7 @@ public class UpsTrackResponseHandler {
 							.getJSONObject("ErrorDetail").getJSONObject("PrimaryErrorCode").getString("Description");
 					nxtLogger.error(error);
 				} catch (JSONException e) {
-					nxtLogger.error(e.getCause() + " " + e.getMessage());
+					log.error(e.getCause() + " " + e.getMessage());
 				}
 				return null;
 			}
@@ -46,13 +46,13 @@ public class UpsTrackResponseHandler {
 			try {
 				pro = jsob.getJSONObject("InquiryNumber").getString("Value");
 			} catch (JSONException e) {
-				nxtLogger.error(e.getCause() + " " + e.getMessage());
+				log.error(e.getCause() + " " + e.getMessage());
 			}
 			status = jsob.getJSONObject("CurrentStatus").getString("Code");
 			try {
 				location = jsob.getJSONObject("ShipmentAddress").getJSONObject("Address").getString("PostalCode");
 			} catch (JSONException e) {
-				nxtLogger.error(e.getCause() + " " + e.getMessage());
+				log.error(e.getCause() + " " + e.getMessage());
 			}
 			message = jsob.getJSONObject("CurrentStatus").getString("Description");
 
@@ -67,7 +67,7 @@ public class UpsTrackResponseHandler {
 					time = jArr.getJSONObject(0).getString("Time");
 				}
 			} catch (JSONException e) {
-				nxtLogger.error(e.getCause() + " " + e.getMessage());
+				log.error(e.getCause() + " " + e.getMessage());
 				try {
 					jsObj = jsob.getJSONObject("DeliveryDetail");
 					if (jsObj.getJSONObject("Type").getString("Description").equals("Estimated Delivery")) {
@@ -75,7 +75,7 @@ public class UpsTrackResponseHandler {
 						time = jsObj.getString("Time");
 					}
 				} catch (JSONException e1) {
-					nxtLogger.error(e1.getCause() + " " + e1.getMessage());
+					log.error(e1.getCause() + " " + e1.getMessage());
 				}
 			}
 
@@ -102,14 +102,14 @@ public class UpsTrackResponseHandler {
 				time = jArr.getJSONObject(0).getString("Time");
 				message = jArr.getJSONObject(0).getString("Description");
 			} catch (JSONException e) {
-				nxtLogger.error(e.getCause() + " " + e.getMessage());
+				log.error(e.getCause() + " " + e.getMessage());
 				try {
 					jsObj = jsob.getJSONObject("Activity");
 					dt = jsObj.getString("Date");
 					time = jsObj.getString("Time");
 					message = jsObj.getString("Description");
 				} catch (JSONException e1) {
-					nxtLogger.error(e1.getCause() + " " + e1.getMessage());
+					log.error(e1.getCause() + " " + e1.getMessage());
 				}
 			}
 

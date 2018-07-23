@@ -161,7 +161,7 @@ public class TrackingController {
 			}
 			log.info(e.getResponseBodyAsString());
 			if (e.getMessage() != null)
-				nxtLogger.error("XPO Tracking Request failed for " + ref + " Error " + e.getMessage());
+				log.error("XPO Tracking Request failed for " + ref + " Error " + e.getMessage()+" "+e.getStackTrace());
 			return e.getResponseBodyAsString();
 		}
 	}
@@ -192,7 +192,7 @@ public class TrackingController {
 				updateActivitySerrvice.updateActivity(response.getBody(), id, 2, refNum);
 				return response.getBody();
 		} catch (HttpClientErrorException e) {
-			log.info("UPS Tracking Request failed for " + ref + " Error " + e.getMessage());
+			log.error("UPS Tracking Request failed for " + ref + " Error " + e.getMessage()+" "+e.getStackTrace());
 			return e.getResponseBodyAsString();
 		}
 	}
@@ -260,7 +260,7 @@ public class TrackingController {
 			ResponseEntity<Object> response = restTemplate.exchange(testUri, HttpMethod.POST, entity, Object.class);
 			log.info("Response " + response.getStatusCode());
 		} catch (Exception e) {
-			nxtLogger.error("Exception " + e.getMessage() + " " + e.getStackTrace());
+			nxtLogger.error("Utl_Status Exception " + e.getMessage() + " " + e.getStackTrace());
 		}
 		return trackingStatusJson;
 	}

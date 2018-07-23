@@ -65,13 +65,13 @@ public class UPS_UpdateActivity {
 		try {
 			jobj = new JSONObject(json);
 			if (jobj.has("Fault")) {
-				nxtLogger.error("UPS FAULT!!");
+				log.error("UPS FAULT!!");
 				try {
 					String error = jobj.getJSONObject("Fault").getJSONObject("detail").getJSONObject("Errors")
 							.getJSONObject("ErrorDetail").getJSONObject("PrimaryErrorCode").getString("Description");
-					nxtLogger.error("UPS Tracking Exception for " + id + " Error:" + error);
+					log.error("UPS Tracking Exception for " + id + " Error:" + error);
 				} catch (JSONException e) {
-					nxtLogger.error("JSON Exception " + e.getMessage());
+					log.error("JSON Exception " + e.getMessage());
 				}
 				return;
 			} else {
@@ -91,7 +91,7 @@ public class UPS_UpdateActivity {
 						estDlvr = parseDateTime(dt, time);
 					}
 				} catch (JSONException e) {
-					nxtLogger.error("JSON Exception " + e.getMessage());
+					log.error("JSON Exception " + e.getMessage());
 					try {
 						js = jsObj.getJSONObject("DeliveryDetail");
 						if (js.getJSONObject("Type").getString("Description").equals("Estimated Delivery")) {
@@ -100,7 +100,7 @@ public class UPS_UpdateActivity {
 							estDlvr = parseDateTime(dt, time);
 						}
 					} catch (JSONException e1) {
-						nxtLogger.error("JSON Exception " + e1.getMessage());
+						log.error("JSON Exception " + e1.getMessage());
 					}
 				}
 
@@ -108,7 +108,7 @@ public class UPS_UpdateActivity {
 				try {
 					jArr = jsObj.getJSONArray("Activity");
 				} catch (JSONException e) {
-					nxtLogger.error("JSON Exception " + e.getMessage());
+					log.error("JSON Exception " + e.getMessage());
 				}
 
 				for (int i = jArr.length() - 1; i >= 0; i--) {

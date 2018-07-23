@@ -31,11 +31,11 @@ public class XpoTrackResponseHandler {
 			try {
 				location = jArr.getJSONObject(0).getJSONObject("currSic").getString("sicName");
 			} catch (JSONException e) {
-				nxtLogger.error(e.getCause() + " " + e.getMessage());
+				log.error(e.getCause() + " " + e.getMessage());
 				try {
 					location = jArr.getJSONObject(0).getJSONObject("origSic").getString("sicName");
 				} catch (JSONException e1) {
-					nxtLogger.error(e1.getCause() + " " + e1.getMessage());
+					log.error(e1.getCause() + " " + e1.getMessage());
 				}
 			}
 			Long time = json.getLong("transactionTimestamp");
@@ -44,7 +44,7 @@ public class XpoTrackResponseHandler {
 				times = jArr.getJSONObject(0).getLong("estdDlvrDate");
 				estDlvr = new java.sql.Timestamp(times);
 			} catch (JSONException e1) {
-				nxtLogger.error(e1.getCause() + " " + e1.getMessage());
+				log.error(e1.getCause() + " " + e1.getMessage());
 			}
 			timestamp = new java.sql.Timestamp(time);
 		} catch (JSONException e) {
@@ -67,7 +67,7 @@ public class XpoTrackResponseHandler {
 			jArr = json.getJSONObject("data").getJSONArray("shipmentStatusDtls");
 			pkupDate = new java.sql.Timestamp(jArr.getJSONObject(0).getLong("pkupDate"));
 		} catch (JSONException e) {
-			nxtLogger.error(e.getCause() + " " + e.getMessage());
+			log.error(e.getCause() + " " + e.getMessage());
 			return null;
 		}
 		return pkupDate;
